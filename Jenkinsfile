@@ -29,6 +29,8 @@ pipeline {
             steps {
                 sh '''
                     echo "🔧 Installing dependencies..."
+                    $PYTHON_BIN -m venv venv
+                    source. venv/bin/activate
                     $PYTHON_BIN -m pip install --upgrade pip
                     $PYTHON_BIN -m pip install -r requirements.txt
                 '''
