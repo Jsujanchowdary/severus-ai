@@ -222,23 +222,23 @@ pipeline {
                     steps {
                         sh '''
                             set +e
-                            echo "🧠 Testing Ollama connectivity (non-blocking)..."
+                            echo "🧠 Testing Ollama connectivity (NON-BLOCKING)"
 
-                            POD=$($KUBECTL_BIN get pod -l app=severus-ai -o jsonpath="{.items[0].metadata.name}")
+                            POD=$($KUBECTL_BIN get pods -l app=severus-ai \
+                            --field-selector=status.phase=Running \
+                            -o jsonpath="{.items[0].metadata.name}")
 
                             if [ -z "$POD" ]; then
-                            echo "⚠️ No Severus AI pod found"
+                            echo "⚠️ No running pod found (rolling deploy). Skipping."
                             exit 0
                             fi
 
                             echo "Using pod: $POD"
 
-                            if $KUBECTL_BIN exec $POD -- curl -s http://host.docker.internal:11434/api/tags >/dev/null; then
-                            echo "✅ Ollama reachable from application pod"
-                            else
-                            echo "⚠️ Ollama NOT reachable (local dependency)"
-                            echo "⚠️ Application will show warning but pipeline continues"
-                            fi
+                            $KUBECTL_BIN exec "$POD" -- \
+                            curl -s --max-time 5 http://host.docker.internal:11434/api/tags \
+                            && echo "✅ Ollama reachable" \
+                            || echo "⚠️ Ollama not reachable (allowed)"
 
                             exit 0
                         '''
