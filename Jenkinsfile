@@ -158,10 +158,22 @@ pipeline {
         stage('Docker Push Image') {
             steps {
                 sh '''
-                    set -euo pipefail
-                    echo "📦 Pushing Docker image..."
-                    $DOCKER_BIN --context ${DOCKER_CONTEXT} push \
-                      ${IMAGE_NAME}:${IMAGE_TAG}
+                    set -e
+
+                    echo "📦 Pushing Docker image (with retry)..."
+
+                    for i in 1 2 3; do
+                    echo "👉 Push attempt $i..."
+                    if $DOCKER_BIN --context ${DOCKER_CONTEXT} push ${IMAGE_NAME}:${IMAGE_TAG}; then
+                        echo "✅ Docker push succeeded"
+                        exit 0
+                    fi
+                    echo "⚠️ Push failed, retrying in 10s..."
+                    sleep 10
+                    done
+
+                    echo "❌ Docker push failed after retries"
+                    exit 1
                 '''
             }
         }
