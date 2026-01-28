@@ -58,10 +58,17 @@ pipeline {
                 sh '''
                     echo "🚀 Starting application for smoke test..."
 
-                    nohup $PYTHON_BIN -m streamlit run app.py \
-                      --server.port=${APP_PORT} \
-                      --server.headless=true \
-                      > app.log 2>&1 &
+                    # Activate venv
+                    . venv/bin/activate
+
+                    # Sanity check
+                    which python
+                    which streamlit
+
+                    nohup streamlit run app.py \
+                    --server.port=${APP_PORT} \
+                    --server.headless=true \
+                    > app.log 2>&1 &
 
                     sleep 20
                 '''
