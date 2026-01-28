@@ -28,11 +28,25 @@ pipeline {
         stage('Application Build') {
             steps {
                 sh '''
-                    echo "🔧 Installing dependencies..."
-                    $PYTHON_BIN -m venv venv
-                    source. venv/bin/activate
-                    $PYTHON_BIN -m pip install --upgrade pip
-                    $PYTHON_BIN -m pip install -r requirements.txt
+                    set -e
+
+                    echo "🔧 Installing dependencies (venv)..."
+
+                    # Create venv
+                    /opt/homebrew/bin/python3 -m venv venv
+
+                    # Activate venv (IMPORTANT)
+                    . venv/bin/activate
+
+                    # Verify we are inside venv
+                    echo "Python in use: $(which python)"
+                    echo "Pip in use: $(which pip)"
+
+                    # Upgrade pip INSIDE venv
+                    pip install --upgrade pip
+
+                    # Install dependencies
+                    pip install -r requirements.txt
                 '''
             }
         }
