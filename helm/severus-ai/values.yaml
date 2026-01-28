@@ -16,4 +16,4 @@ ingress:
         - path: /
           pathType: Prefix
 env:
-  OLLAMA_BASE_URL: "http://host.k3d.internal:11434"
+  OLLAMA_BASE_URL: "http://ollama.default.svc.cluster.local:11434"
