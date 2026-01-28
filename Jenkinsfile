@@ -2,17 +2,17 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "adityahere/severus-ai"
+        IMAGE_NAME = "sujanchow/serverus-ai"
         IMAGE_TAG  = "v1"
 
         APP_PORT = "8505"
 
-        DOCKER_BIN     = "/usr/local/bin/docker"
+        DOCKER_BIN     = "/Applications/Docker.app/Contents/Resources/bin/docker"
         DOCKER_CONTEXT = "desktop-linux"
 
-        PYTHON_BIN  = "/usr/bin/python3"
+        PYTHON_BIN  = "/opt/homebrew/bin/python3"
         HELM_BIN    = "/opt/homebrew/bin/helm"
-        KUBECTL_BIN = "/opt/homebrew/bin/kubectl"
+        KUBECTL_BIN = "/Applications/Docker.app/Contents/Resources/bin/kubectl"
     }
 
     stages {

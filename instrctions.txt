@@ -1,12 +1,12 @@
 start docker desktop:
-docker build -t adityahere/severus-ai:v1 .
+docker build -t sujanchow/serverus-ai:v1 .
 
 
  docker run -d \                        
   -p 8501:8501 \
   -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
   --name severus-ai \
-  adityahere/severus-ai:v1
+  sujanchow/serverus-ais:v1
 
 
 minikube:
@@ -35,7 +35,9 @@ http://localhost:8503/
 
 while about to start :
 docker info
+brew install k3d
 k3d cluster list
+k3d cluster create severus-cluster
 k3d cluster start severus-cluster (if cluster stopped)
 kubectl get nodes
 brew services start jenkins-lts
