@@ -1,0 +1,51 @@
+start docker desktop:
+docker build -t adityahere/severus-ai:v1 .
+
+
+ docker run -d \                        
+  -p 8501:8501 \
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+  --name severus-ai \
+  adityahere/severus-ai:v1
+
+
+minikube:
+minikube start
+minikube stop
+
+jenkins commands:
+brew services start jenkins-lts  
+brew services restart jenkins-lts
+brew upgrade jenkins-lts
+brew services stop jenkins-lts
+http://localhost:8080/
+
+git:
+git init
+git add <file>
+git commit -m "msg"
+git push -u origin main
+
+
+
+
+application local host:
+http://localhost:8503/
+
+
+while about to start :
+docker info
+k3d cluster list
+k3d cluster start severus-cluster (if cluster stopped)
+kubectl get nodes
+brew services start jenkins-lts
+brew services list | grep jenkins (verify)
+http://localhost:8080 (open jenkins)
+
+the application link comes from ingress:
+kubectl get ingress
+Final Application URL
+ http://severus-ai.local
+
+
+
