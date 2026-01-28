@@ -10,6 +10,9 @@ pipeline {
         DOCKER_BIN     = "/Applications/Docker.app/Contents/Resources/bin/docker"
         DOCKER_CONTEXT = "desktop-linux"
 
+        // Ensure Docker Desktop + credential helper are visible to Jenkins
+        PATH = "/Applications/Docker.app/Contents/Resources/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
         PYTHON_BIN  = "/opt/homebrew/bin/python3"
         HELM_BIN    = "/opt/homebrew/bin/helm"
         KUBECTL_BIN = "/Applications/Docker.app/Contents/Resources/bin/kubectl"
@@ -28,24 +31,17 @@ pipeline {
         stage('Application Build') {
             steps {
                 sh '''
-                    set -e
+                    set -euo pipefail
 
                     echo "🔧 Installing dependencies (venv)..."
 
-                    # Create venv
-                    /opt/homebrew/bin/python3 -m venv venv
-
-                    # Activate venv (IMPORTANT)
+                    $PYTHON_BIN -m venv venv
                     . venv/bin/activate
 
-                    # Verify we are inside venv
                     echo "Python in use: $(which python)"
                     echo "Pip in use: $(which pip)"
 
-                    # Upgrade pip INSIDE venv
                     pip install --upgrade pip
-
-                    # Install dependencies
                     pip install -r requirements.txt
                 '''
             }
@@ -56,19 +52,24 @@ pipeline {
         stage('Run (Smoke Start)') {
             steps {
                 sh '''
+                    set -euo pipefail
+
                     echo "🚀 Starting application for smoke test..."
 
-                    # Activate venv
                     . venv/bin/activate
 
-                    # Sanity check
+                    if [ -z "$VIRTUAL_ENV" ]; then
+                      echo "❌ Virtualenv not active"
+                      exit 1
+                    fi
+
                     which python
                     which streamlit
 
                     nohup streamlit run app.py \
-                    --server.port=${APP_PORT} \
-                    --server.headless=true \
-                    > app.log 2>&1 &
+                      --server.port=${APP_PORT} \
+                      --server.headless=true \
+                      > app.log 2>&1 &
 
                     sleep 20
                 '''
@@ -80,24 +81,46 @@ pipeline {
         stage('Test (Smoke Test)') {
             steps {
                 sh '''
+                    set -euo pipefail
+
                     echo "🧪 Running smoke test..."
 
                     echo "---- App logs ----"
                     tail -n 30 app.log || true
                     echo "------------------"
 
-                    curl --fail http://127.0.0.1:${APP_PORT}
+                    curl --retry 5 --retry-delay 2 --fail http://127.0.0.1:${APP_PORT}
 
                     echo "✅ Smoke test passed"
                 '''
             }
         }
 
-        /* ================= DOCKER ================= */
+        /* ================= DOCKER LOGIN ================= */
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "🔐 Logging into Docker Hub..."
+                        echo "$DOCKER_PASS" | \
+                        $DOCKER_BIN --context ${DOCKER_CONTEXT} login \
+                          -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
+            }
+        }
+
+        /* ================= DOCKER BUILD ================= */
 
         stage('Docker Build Image') {
             steps {
                 sh '''
+                    set -euo pipefail
                     echo "🐳 Building Docker image..."
                     $DOCKER_BIN --context ${DOCKER_CONTEXT} build \
                       -t ${IMAGE_NAME}:${IMAGE_TAG} .
@@ -110,10 +133,13 @@ pipeline {
         stage('Trivy Security Scan') {
             steps {
                 sh '''
+                    set -euo pipefail
                     echo "🔐 Running Trivy scan..."
 
+                    DOCKER_SOCK=$(ls ~/.docker/run/docker.sock 2>/dev/null || echo /var/run/docker.sock)
+
                     $DOCKER_BIN --context ${DOCKER_CONTEXT} run --rm \
-                      -v /Users/aditya/.docker/run/docker.sock:/var/run/docker.sock \
+                      -v $DOCKER_SOCK:/var/run/docker.sock \
                       aquasec/trivy:latest image \
                       --severity CRITICAL,HIGH \
                       --exit-code 0 \
@@ -131,20 +157,12 @@ pipeline {
 
         stage('Docker Push Image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | \
-                        $DOCKER_BIN --context ${DOCKER_CONTEXT} login \
-                          -u "$DOCKER_USER" --password-stdin
-
-                        $DOCKER_BIN --context ${DOCKER_CONTEXT} push \
-                          ${IMAGE_NAME}:${IMAGE_TAG}
-                    '''
-                }
+                sh '''
+                    set -euo pipefail
+                    echo "📦 Pushing Docker image..."
+                    $DOCKER_BIN --context ${DOCKER_CONTEXT} push \
+                      ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
 
@@ -153,7 +171,8 @@ pipeline {
         stage('Deploy to Kubernetes (Ingress via Helm)') {
             steps {
                 sh '''
-                    echo "☸️ Deploying Severus AI with Ingress..."
+                    set -euo pipefail
+                    echo "☸️ Deploying Severus AI..."
 
                     $HELM_BIN upgrade --install severus-ai helm/severus-ai \
                       --set image.repository=${IMAGE_NAME} \
@@ -162,7 +181,7 @@ pipeline {
             }
         }
 
-        /* ================= POST-DEPLOY PARALLEL TESTS ================= */
+        /* ================= POST-DEPLOY TESTS ================= */
 
         stage('Post-Deployment Tests') {
             parallel {
@@ -180,21 +199,18 @@ pipeline {
                 stage('Ollama Connectivity Test') {
                     steps {
                         sh '''
-                            echo "🧠 Testing Ollama connectivity from pod..."
+                            echo "🧠 Testing Ollama connectivity..."
 
                             POD=$($KUBECTL_BIN get pod -l app=severus-ai -o jsonpath="{.items[0].metadata.name}")
-                            echo "Using pod: $POD"
 
                             OLLAMA_URL=$($KUBECTL_BIN exec $POD -- sh -c 'echo $OLLAMA_BASE_URL')
 
                             if [ -z "$OLLAMA_URL" ]; then
-                              echo "❌ OLLAMA_BASE_URL is NOT set"
+                              echo "❌ OLLAMA_BASE_URL not set"
                               exit 1
                             fi
 
-                            echo "OLLAMA_BASE_URL=$OLLAMA_URL"
                             $KUBECTL_BIN exec $POD -- curl --fail ${OLLAMA_URL}/api/tags
-
                             echo "✅ Ollama reachable"
                         '''
                     }
@@ -206,7 +222,6 @@ pipeline {
                             echo "🩺 Checking Kubernetes health..."
                             $KUBECTL_BIN rollout status deployment/severus-ai --timeout=120s
                             $KUBECTL_BIN get pods -l app=severus-ai
-                            echo "✅ Kubernetes healthy"
                         '''
                     }
                 }
@@ -214,42 +229,25 @@ pipeline {
                 stage('Log Sanity Test') {
                     steps {
                         sh '''
-                            echo "📜 Checking application logs..."
+                            echo "📜 Checking logs..."
                             $KUBECTL_BIN logs deployment/severus-ai | tail -n 50
-                            echo "✅ Logs look sane"
                         '''
                     }
                 }
 
-                /* 🆕 NEW STAGE */
                 stage('K3s Version Validation') {
                     steps {
                         sh '''
-                            echo "🧪 Validating Helm chart against multiple K3s versions..."
-
                             mkdir -p k3s-validation-logs
 
                             for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35; do
-                              echo "▶ Testing against K3s $VERSION"
-
-                              {
-                                echo "====================================="
-                                echo "K3s Version Target: $VERSION"
-                                echo "Timestamp: $(date)"
-                                echo "-------------------------------------"
-                                $HELM_BIN upgrade --install severus-ai helm/severus-ai \
-                                  --dry-run --debug \
-                                  --set image.repository=${IMAGE_NAME} \
-                                  --set image.tag=${IMAGE_TAG} \
-                                  --set global.k3sVersion=$VERSION
-                                echo "-------------------------------------"
-                                $KUBECTL_BIN version
-                                echo "====================================="
-                              } > k3s-validation-logs/k3s-$VERSION.log
-
+                              $HELM_BIN upgrade --install severus-ai helm/severus-ai \
+                                --dry-run --debug \
+                                --set image.repository=${IMAGE_NAME} \
+                                --set image.tag=${IMAGE_TAG} \
+                                --set global.k3sVersion=$VERSION \
+                                > k3s-validation-logs/k3s-$VERSION.log
                             done
-
-                            echo "✅ K3s version validation completed"
                         '''
                     }
                     post {
