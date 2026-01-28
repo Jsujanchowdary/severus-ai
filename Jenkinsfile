@@ -201,27 +201,22 @@ pipeline {
                 stage('Ingress Reachability Test') {
                     steps {
                         sh '''
-    set -euo pipefail
+                        set -euo pipefail
 
-    echo "🌐 Testing Ingress reachability via Traefik (port-forward)..."
+                        echo "🌐 Testing Ingress reachability via Traefik (port-forward)..."
 
-    # Start port-forward in background
-    $KUBECTL_BIN -n kube-system port-forward svc/traefik 8080:80 >/tmp/traefik-portforward.log 2>&1 &
-    PF_PID=$!
+                        kubectl -n kube-system port-forward svc/traefik 8080:80 >/tmp/traefik.log 2>&1 &
+                        PF_PID=$!
+                        trap "kill $PF_PID" EXIT
 
-    # Ensure port-forward is cleaned up
-    trap "kill $PF_PID" EXIT
+                        sleep 5
 
-    # Give port-forward time to establish
-    sleep 5
+                        curl --retry 5 --retry-delay 2 --fail \
+                            -H "Host: severus-ai.local" \
+                            http://127.0.0.1:8080
 
-    # Test ingress using Host header
-    curl --retry 5 --retry-delay 2 --fail \
-      -H "Host: severus-ai.local" \
-      http://127.0.0.1:8080
-
-    echo "✅ Ingress reachable via Traefik"
-'''
+                        echo "✅ Ingress reachable via Traefik"
+                        '''
                     }
                 }
 
