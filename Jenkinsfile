@@ -203,17 +203,15 @@ pipeline {
                         sh '''
                         set -euo pipefail
 
-                        echo "🌐 Testing Ingress reachability via Traefik (port-forward)..."
+                        echo "🌐 Testing Ingress reachability via Traefik (safe port 8081)..."
 
-                        kubectl -n kube-system port-forward svc/traefik 8080:80 >/tmp/traefik.log 2>&1 &
-                        PF_PID=$!
-                        trap "kill $PF_PID" EXIT
+                        kubectl -n kube-system port-forward svc/traefik 8081:80 >/tmp/traefik.log 2>&1 &
 
                         sleep 5
 
                         curl --retry 5 --retry-delay 2 --fail \
                             -H "Host: severus-ai.local" \
-                            http://127.0.0.1:8080
+                            http://127.0.0.1:8081
 
                         echo "✅ Ingress reachable via Traefik"
                         '''
