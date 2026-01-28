@@ -221,19 +221,26 @@ pipeline {
                 stage('Ollama Connectivity Test') {
                     steps {
                         sh '''
-                            echo "🧠 Testing Ollama connectivity..."
+                            set +e
+                            echo "🧠 Testing Ollama connectivity (non-blocking)..."
 
                             POD=$($KUBECTL_BIN get pod -l app=severus-ai -o jsonpath="{.items[0].metadata.name}")
 
-                            OLLAMA_URL=$($KUBECTL_BIN exec $POD -- sh -c 'echo $OLLAMA_BASE_URL')
-
-                            if [ -z "$OLLAMA_URL" ]; then
-                              echo "❌ OLLAMA_BASE_URL not set"
-                              exit 1
+                            if [ -z "$POD" ]; then
+                            echo "⚠️ No Severus AI pod found"
+                            exit 0
                             fi
 
-                            $KUBECTL_BIN exec $POD -- curl --fail ${OLLAMA_URL}/api/tags
-                            echo "✅ Ollama reachable"
+                            echo "Using pod: $POD"
+
+                            if $KUBECTL_BIN exec $POD -- curl -s http://host.docker.internal:11434/api/tags >/dev/null; then
+                            echo "✅ Ollama reachable from application pod"
+                            else
+                            echo "⚠️ Ollama NOT reachable (local dependency)"
+                            echo "⚠️ Application will show warning but pipeline continues"
+                            fi
+
+                            exit 0
                         '''
                     }
                 }

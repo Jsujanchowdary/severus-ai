@@ -15,5 +15,5 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-env:
-  OLLAMA_BASE_URL: "http://ollama.default.svc.cluster.local:11434"
+ollama:
+  baseUrl: http://host.docker.internal:11434
