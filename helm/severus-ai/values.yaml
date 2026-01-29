@@ -66,11 +66,11 @@ stress:
     targets:
       - http://severus-ai:8501
     
-    # Load parameters
-    totalRequests: 500
-    concurrency: 70
-    runs: 5
-    sleepSeconds: 5
+    # Load parameters - Increased for HPA scaling demo
+    totalRequests: 2000
+    concurrency: 150
+    runs: 10
+    sleepSeconds: 2
     
     # Pod labels to validate
     podLabels:
