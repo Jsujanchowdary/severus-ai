@@ -68,7 +68,7 @@ stress:
     
     # Load parameters
     totalRequests: 500
-    concurrency: 20
+    concurrency: 70
     runs: 5
     sleepSeconds: 5
     
