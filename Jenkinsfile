@@ -264,6 +264,36 @@ pipeline {
                     }
                 }
 
+                stage('Stress Pod Performance Test') {
+                    steps {
+                        sh '''
+                            set +e
+                            echo "🔥 Starting stress test job for Severus AI (NON-BLOCKING)"
+
+                            JOB_NAME=stress-pod
+
+                            # Clean up old job if exists (safe)
+                            $KUBECTL_BIN delete job $JOB_NAME --ignore-not-found
+
+                            echo "📦 Applying stress job manifest..."
+                            $KUBECTL_BIN apply -f k8s/stress/stress-job.yaml
+
+                            echo "⏳ Waiting for stress job to complete..."
+                            $KUBECTL_BIN wait --for=condition=complete job/$JOB_NAME --timeout=120s \
+                            || echo "⚠️ Stress job timeout (allowed)"
+
+                            echo "📜 Stress job logs:"
+                            $KUBECTL_BIN logs job/$JOB_NAME || echo "⚠️ No logs available"
+
+                            echo "🧹 Cleaning up stress job..."
+                            $KUBECTL_BIN delete job $JOB_NAME --ignore-not-found
+
+                            echo "✅ Stress test stage finished"
+                            exit 0
+                        '''
+                    }
+                }
+
                 stage('K3s Version Validation') {
                     steps {
                         sh '''

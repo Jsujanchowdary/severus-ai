@@ -1,0 +1,5 @@
+image:
+  repository: sujanchow/stress-pod
+  tag: "1.0"
+
+targetUrl: "http://severus-ai.default.svc.cluster.local:8501"

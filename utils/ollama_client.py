@@ -7,7 +7,8 @@ import os
 # OLLAMA CONFIG (AUTO)
 # =========================
 OLLAMA_BASE_URL = os.getenv(
-    "OLLAMA_BASE_URL", "http://localhost:11434"  # ✅ Kubernetes Service DNS (default)
+    "OLLAMA_BASE_URL",
+    "http://host.docker.internal:11434"
 )
 
 logger = logging.getLogger("ollama-client")
