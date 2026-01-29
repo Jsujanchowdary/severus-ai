@@ -225,6 +225,37 @@ if [[ ${#POD_LABELS[@]} -gt 0 ]]; then
       OVERALL_STATUS="FAIL"
     else
       echo "✅ Pods are running for label: $LABEL"
+      
+      # -----------------------------
+      # Pod Log Verification (NEW)
+      # -----------------------------
+      echo ""
+      echo "📊 Verifying requests in pod logs..."
+      echo "----------------------------------------------"
+      
+      TOTAL_LOG_REQUESTS=0
+      for POD in $(kubectl get pods -l "$LABEL" --field-selector=status.phase=Running -o jsonpath='{.items[*].metadata.name}'); do
+        # Count GET requests in pod logs (Streamlit access logs)
+        LOG_COUNT=$(kubectl logs "$POD" 2>/dev/null | grep -c "GET" || echo 0)
+        LOG_COUNT=$(echo "$LOG_COUNT" | tr -cd '0-9')
+        
+        echo "Pod: $POD → GET requests in logs: $LOG_COUNT"
+        TOTAL_LOG_REQUESTS=$((TOTAL_LOG_REQUESTS + LOG_COUNT))
+      done
+      
+      echo "----------------------------------------------"
+      echo "Total GET requests in logs : $TOTAL_LOG_REQUESTS"
+      echo "Expected from stress test  : $EXPECTED_TOTAL"
+      
+      # Note: Log count may differ from expected due to:
+      # - Streamlit may not log every request
+      # - Health checks and other requests
+      # - Log rotation or truncation
+      if [[ $TOTAL_LOG_REQUESTS -gt 0 ]]; then
+        echo "✅ Pods received requests (verified via logs)"
+      else
+        echo "⚠️  No GET requests found in logs (Streamlit may not log all requests)"
+      fi
     fi
     echo "----------------------------------------------"
   done
