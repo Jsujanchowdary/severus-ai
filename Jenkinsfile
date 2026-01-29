@@ -185,7 +185,10 @@ pipeline {
                 sh '''
                     set -euo pipefail
                     echo "☸️ Deploying Severus AI..."
-
+                    
+                    # Delete old stress-pod job if it exists (Jobs are immutable)
+                    $KUBECTL_BIN delete job stress-pod --ignore-not-found=true
+                    
                     $HELM_BIN upgrade --install severus-ai helm/severus-ai \
                       --set image.repository=${IMAGE_NAME} \
                       --set image.tag=${IMAGE_TAG}
