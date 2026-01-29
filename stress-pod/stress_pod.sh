@@ -236,8 +236,11 @@ if [[ ${#POD_LABELS[@]} -gt 0 ]]; then
       TOTAL_LOG_REQUESTS=0
       for POD in $(kubectl get pods -l "$LABEL" --field-selector=status.phase=Running -o jsonpath='{.items[*].metadata.name}'); do
         # Count GET requests in pod logs (Streamlit access logs)
-        LOG_COUNT=$(kubectl logs "$POD" 2>/dev/null | grep -c "GET" || echo 0)
-        LOG_COUNT=$(echo "$LOG_COUNT" | tr -cd '0-9')
+        LOG_COUNT=$(kubectl logs "$POD" 2>/dev/null | grep -c "GET" || echo "0")
+        # Ensure it's a valid number
+        if ! [[ "$LOG_COUNT" =~ ^[0-9]+$ ]]; then
+          LOG_COUNT=0
+        fi
         
         echo "Pod: $POD → GET requests in logs: $LOG_COUNT"
         TOTAL_LOG_REQUESTS=$((TOTAL_LOG_REQUESTS + LOG_COUNT))
