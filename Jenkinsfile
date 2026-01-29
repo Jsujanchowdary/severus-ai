@@ -179,6 +179,7 @@ pipeline {
         }
 
         /* ================= STRESS POD IMAGE BUILD ================= */
+        /* Builds and pushes stress-pod Docker image automatically */
 
         stage('Build Stress Pod Image') {
             steps {
