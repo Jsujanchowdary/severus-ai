@@ -178,6 +178,38 @@ pipeline {
             }
         }
 
+        /* ================= STRESS POD IMAGE BUILD ================= */
+
+        stage('Build Stress Pod Image') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "🔨 Building stress-pod Docker image..."
+                    
+                    cd stress-pod
+                    $DOCKER_BIN --context ${DOCKER_CONTEXT} build \
+                      -t sujanchow/stress-pod:${IMAGE_TAG} \
+                      -t sujanchow/stress-pod:latest .
+                    
+                    echo "✅ Stress-pod image built successfully"
+                '''
+            }
+        }
+
+        stage('Push Stress Pod Image') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "📤 Pushing stress-pod image to registry..."
+                    
+                    $DOCKER_BIN --context ${DOCKER_CONTEXT} push sujanchow/stress-pod:${IMAGE_TAG}
+                    $DOCKER_BIN --context ${DOCKER_CONTEXT} push sujanchow/stress-pod:latest
+                    
+                    echo "✅ Stress-pod image pushed successfully"
+                '''
+            }
+        }
+
         /* ================= DEPLOY ================= */
 
         stage('Deploy to Kubernetes (Ingress via Helm)') {
