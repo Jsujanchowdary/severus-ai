@@ -20,4 +20,12 @@ spec:
             - containerPort: 8501
           env:
             - name: OLLAMA_BASE_URL
-              value: http://host.docker.internal:11434
+              value: {{ .Values.ollama.baseUrl }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+

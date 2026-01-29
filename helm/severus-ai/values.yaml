@@ -1,12 +1,32 @@
+# ------------------------
+# Application Image
+# ------------------------
 image:
   repository: sujanchow/serverus-ai
   tag: v1
   pullPolicy: IfNotPresent
 
+# ------------------------
+# Application Resources
+# ------------------------
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# ------------------------
+# Service Configuration
+# ------------------------
 service:
   type: ClusterIP
   port: 8501
 
+# ------------------------
+# Ingress Configuration
+# ------------------------
 ingress:
   enabled: true
   className: traefik
@@ -15,5 +35,50 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
+
+# ------------------------
+# Ollama Configuration
+# ------------------------
 ollama:
   baseUrl: http://host.docker.internal:11434
+
+# ------------------------
+# HPA Configuration
+# ------------------------
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  cpu:
+    averageUtilization: 50
+
+# ------------------------
+# Stress Testing
+# ------------------------
+stress:
+  enabled: true
+  image:
+    repository: sujanchow/stress-pod
+    tag: "latest"
+  
+  args:
+    # Target URL for stress testing
+    targets:
+      - http://severus-ai:8501
+    
+    # Load parameters
+    totalRequests: 500
+    concurrency: 20
+    runs: 5
+    sleepSeconds: 5
+    
+    # Pod labels to validate
+    podLabels:
+      - app=severus-ai
+
+# ------------------------
+# RBAC
+# ------------------------
+rbac:
+  create: true
+  serviceAccountName: stress-sa

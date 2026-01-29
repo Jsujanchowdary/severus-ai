@@ -264,36 +264,6 @@ pipeline {
                     }
                 }
 
-                stage('Stress Pod Performance Test') {
-                    steps {
-                        sh '''
-                            set +e
-                            echo "🔥 Starting stress test job for Severus AI (NON-BLOCKING)"
-
-                            JOB_NAME=stress-pod
-
-                            # Clean up old job if exists (safe)
-                            $KUBECTL_BIN delete job $JOB_NAME --ignore-not-found
-
-                            echo "📦 Applying stress job manifest..."
-                            $KUBECTL_BIN apply -f k8s/stress/stress-job.yaml
-
-                            echo "⏳ Waiting for stress job to complete..."
-                            $KUBECTL_BIN wait --for=condition=complete job/$JOB_NAME --timeout=120s \
-                            || echo "⚠️ Stress job timeout (allowed)"
-
-                            echo "📜 Stress job logs:"
-                            $KUBECTL_BIN logs job/$JOB_NAME || echo "⚠️ No logs available"
-
-                            echo "🧹 Cleaning up stress job..."
-                            $KUBECTL_BIN delete job $JOB_NAME --ignore-not-found
-
-                            echo "✅ Stress test stage finished"
-                            exit 0
-                        '''
-                    }
-                }
-
                 stage('K3s Version Validation') {
                     steps {
                         sh '''
@@ -314,6 +284,90 @@ pipeline {
                             archiveArtifacts artifacts: 'k3s-validation-logs/*.log', fingerprint: true
                         }
                     }
+                }
+            }
+        }
+
+        /* ================= STRESS TEST ================= */
+
+        stage('Stress Test') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    
+                    echo "🔥 Starting Stress Test..."
+                    
+                    # Delete previous stress test job if exists
+                    $KUBECTL_BIN delete job stress-pod --ignore-not-found=true
+                    
+                    # Wait for job deletion
+                    sleep 5
+                    
+                    # Deploy stress test (this creates the job)
+                    echo "Deploying stress test job..."
+                    $HELM_BIN upgrade --install severus-ai helm/severus-ai \
+                      --set image.repository=${IMAGE_NAME} \
+                      --set image.tag=${IMAGE_TAG} \
+                      --set stress.enabled=true
+                    
+                    # Wait for job to start
+                    echo "Waiting for stress test job to start..."
+                    sleep 10
+                    
+                    # Monitor job status
+                    echo "Monitoring stress test progress..."
+                    for i in {1..60}; do
+                      STATUS=$($KUBECTL_BIN get job stress-pod -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || echo "")
+                      FAILED=$($KUBECTL_BIN get job stress-pod -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || echo "")
+                      
+                      if [ "$STATUS" = "True" ]; then
+                        echo "✅ Stress test completed successfully"
+                        break
+                      elif [ "$FAILED" = "True" ]; then
+                        echo "❌ Stress test failed"
+                        $KUBECTL_BIN logs job/stress-pod || true
+                        exit 1
+                      fi
+                      
+                      echo "Stress test still running... ($i/60)"
+                      sleep 10
+                    done
+                    
+                    # Get final logs
+                    echo ""
+                    echo "=============================================="
+                    echo "STRESS TEST LOGS"
+                    echo "=============================================="
+                    $KUBECTL_BIN logs job/stress-pod || echo "Could not retrieve logs"
+                    
+                    # Check HPA status
+                    echo ""
+                    echo "=============================================="
+                    echo "HPA STATUS"
+                    echo "=============================================="
+                    $KUBECTL_BIN get hpa severus-ai-hpa || echo "HPA not found"
+                    
+                    # Check pod scaling
+                    echo ""
+                    echo "=============================================="
+                    echo "POD STATUS"
+                    echo "=============================================="
+                    $KUBECTL_BIN get pods -l app=severus-ai
+                    
+                    echo ""
+                    echo "✅ Stress test stage completed"
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        # Archive stress test logs
+                        $KUBECTL_BIN logs job/stress-pod > stress-test-logs.txt 2>&1 || echo "No logs available" > stress-test-logs.txt
+                        
+                        # Get HPA events
+                        $KUBECTL_BIN describe hpa severus-ai-hpa > hpa-events.txt 2>&1 || echo "No HPA found" > hpa-events.txt
+                    '''
+                    archiveArtifacts artifacts: 'stress-test-logs.txt,hpa-events.txt', fingerprint: true
                 }
             }
         }
