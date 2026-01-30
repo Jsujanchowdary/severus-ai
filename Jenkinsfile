@@ -47,6 +47,9 @@ pipeline {
                     $HELM_BIN upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
                         --namespace default \
                         --set grafana.adminPassword=admin123 \
+                        --set grafana.ingress.enabled=true \
+                        --set grafana.ingress.ingressClassName=traefik \
+                        --set grafana.ingress.hosts[0]=grafana.local \
                         --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
                 '''
             }

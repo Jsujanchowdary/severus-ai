@@ -1,5 +1,5 @@
 Started by user Sujan Chowdary
-Obtained Jenkinsfile from git https://github.com/Jsujanchowdary/severus-ai
+Replayed #36
 [Pipeline] Start of Pipeline
 [Pipeline] node
 Running on Jenkins in /Users/jsujanchowdary/.jenkins/workspace/severus-ai
@@ -18,11 +18,11 @@ Fetching upstream changes from https://github.com/Jsujanchowdary/severus-ai
  > git --version # 'git version 2.50.1 (Apple Git-155)'
  > git fetch --tags --force --progress -- https://github.com/Jsujanchowdary/severus-ai +refs/heads/*:refs/remotes/origin/* # timeout=10
  > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
-Checking out Revision 12c772e3ef1947acf2189d6839bc020d27e201d4 (refs/remotes/origin/main)
+Checking out Revision 304f9cb0192f96466d4941fc44afb415b5d58b9f (refs/remotes/origin/main)
  > git config core.sparsecheckout # timeout=10
- > git checkout -f 12c772e3ef1947acf2189d6839bc020d27e201d4 # timeout=10
+ > git checkout -f 304f9cb0192f96466d4941fc44afb415b5d58b9f # timeout=10
 Commit message: "adding monitoring service"
- > git rev-list --no-walk a7b970ea3a773603e06349ffa95ead38e17dc0cb # timeout=10
+ > git rev-list --no-walk 5d9b67036ed07330ae9763f9a633a784fc5dd2b1 # timeout=10
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] withEnv
@@ -43,9 +43,9 @@ Fetching upstream changes from https://github.com/Jsujanchowdary/severus-ai
  > git --version # 'git version 2.50.1 (Apple Git-155)'
  > git fetch --tags --force --progress -- https://github.com/Jsujanchowdary/severus-ai +refs/heads/*:refs/remotes/origin/* # timeout=10
  > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
-Checking out Revision 12c772e3ef1947acf2189d6839bc020d27e201d4 (refs/remotes/origin/main)
+Checking out Revision 304f9cb0192f96466d4941fc44afb415b5d58b9f (refs/remotes/origin/main)
  > git config core.sparsecheckout # timeout=10
- > git checkout -f 12c772e3ef1947acf2189d6839bc020d27e201d4 # timeout=10
+ > git checkout -f 304f9cb0192f96466d4941fc44afb415b5d58b9f # timeout=10
 Commit message: "adding monitoring service"
 [Pipeline] }
 [Pipeline] // stage
@@ -59,8 +59,8 @@ Commit message: "adding monitoring service"
 "prometheus-community" already exists with the same configuration, skipping
 + /opt/homebrew/bin/helm repo update
 Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "prometheus-community" chart repository
 ...Successfully got an update from the "grafana" chart repository
+...Successfully got an update from the "prometheus-community" chart repository
 Update Complete. ⎈Happy Helming!⎈
 [Pipeline] }
 [Pipeline] // stage
@@ -74,10 +74,10 @@ Update Complete. ⎈Happy Helming!⎈
 level=WARN msg="unable to find exact version; falling back to closest available version" chart=kube-prometheus-stack requested="" selected=81.4.1
 Release "kube-prometheus-stack" has been upgraded. Happy Helming!
 NAME: kube-prometheus-stack
-LAST DEPLOYED: Sat Jan 31 02:07:01 2026
+LAST DEPLOYED: Sat Jan 31 02:24:24 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 2
+REVISION: 4
 DESCRIPTION: Upgrade complete
 NOTES:
 kube-prometheus-stack has been installed. Check its status by running:
@@ -110,17 +110,18 @@ Visit https://github.com/prometheus-operator/kube-prometheus for instructions on
 servicemonitor.monitoring.coreos.com/severus-ai not labeled
 + echo '📥 Importing Grafana Dashboard...'
 📥 Importing Grafana Dashboard...
-+ sleep 10
++ PF_PID=79403
++ sleep 8
++ /Applications/Docker.app/Contents/Resources/bin/kubectl port-forward svc/kube-prometheus-stack-grafana 3001:80
 + DASHBOARD_PATH=config/grafana-dashboard-application.json
 + '[' -f config/grafana-dashboard-application.json ']'
-+ echo 'Found dashboard file. Importing...'
-Found dashboard file. Importing...
-+ curl -u admin:admin123 -X POST -H 'Content-Type: application/json' -d @config/grafana-dashboard-application.json http://kube-prometheus-stack-grafana.default.svc.cluster.local/api/dashboards/db
++ echo 'Found dashboard file. Importing via port-forward (http://127.0.0.1:3001)...'
+Found dashboard file. Importing via port-forward (http://127.0.0.1:3001)...
++ curl --fail --retry 5 --retry-delay 2 -u admin:admin123 -X POST -H 'Content-Type: application/json' -d @config/grafana-dashboard-application.json http://127.0.0.1:3001/api/dashboards/db
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0curl: (6) Could not resolve host: kube-prometheus-stack-grafana.default.svc.cluster.local
-+ echo '⚠️ Failed to import dashboard via internal URL, trying local port-forward fallback if in local mode'
-⚠️ Failed to import dashboard via internal URL, trying local port-forward fallback if in local mode
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  7007    0     0  100  7007      0  3283k --:--:-- --:--:-- --:--:-- 3421k100  7226  100   219  100  7007   2862  91593 --:--:-- --:--:-- --:--:-- 93844
+{"folderUid":"","id":33,"slug":"severus-ai-application-metrics","status":"success","uid":"e08fa678-f2ef-4f8e-933a-3061c2773c7d","url":"/d/e08fa678-f2ef-4f8e-933a-3061c2773c7d/severus-ai-application-metrics","version":1}+ kill 79403
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
@@ -269,7 +270,7 @@ Requirement already satisfied: six>=1.5 in ./venv/lib/python3.14/site-packages (
 + curl --retry 5 --retry-delay 2 --fail http://127.0.0.1:8505
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1522  100  1522    0     0   385k      0 --:--:-- --:--:-- --:--:--  495k
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1522  100  1522    0     0   337k      0 --:--:-- --:--:-- --:--:--  371k
 <!--
  Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2026)
 
@@ -349,14 +350,11 @@ Login Succeeded
 #1 transferring dockerfile: 400B done
 #1 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/python:3.11-slim
-#2 ...
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
 
-#3 [auth] library/python:pull token for registry-1.docker.io
-#3 DONE 0.0s
-
-#2 [internal] load metadata for docker.io/library/python:3.11-slim
-#2 DONE 2.5s
+#3 [internal] load metadata for docker.io/library/python:3.11-slim
+#3 DONE 2.3s
 
 #4 [internal] load .dockerignore
 #4 transferring context: 2B done
@@ -366,36 +364,36 @@ Login Succeeded
 #5 DONE 0.0s
 
 #6 [internal] load build context
-#6 transferring context: 1.40MB 0.8s done
-#6 DONE 0.9s
+#6 transferring context: 1.22MB 0.8s done
+#6 DONE 0.8s
 
-#7 [4/7] COPY requirements.txt .
+#7 [2/7] WORKDIR /app
 #7 CACHED
 
-#8 [2/7] WORKDIR /app
+#8 [3/7] RUN apt-get update && apt-get install -y     curl     && rm -rf /var/lib/apt/lists/*
 #8 CACHED
 
-#9 [3/7] RUN apt-get update && apt-get install -y     curl     && rm -rf /var/lib/apt/lists/*
+#9 [4/7] COPY requirements.txt .
 #9 CACHED
 
 #10 [5/7] RUN pip install --no-cache-dir -r requirements.txt
 #10 CACHED
 
 #11 [6/7] COPY . .
-#11 DONE 2.0s
+#11 DONE 1.6s
 
 #12 [7/7] RUN chmod +x start.sh
 #12 DONE 0.1s
 
 #13 exporting to image
 #13 exporting layers
-#13 exporting layers 0.7s done
-#13 writing image sha256:d171f6f5c2405eab90718b16acc53533a00bd8c3784fc14d0bf0d53639e1ad4d
-#13 writing image sha256:d171f6f5c2405eab90718b16acc53533a00bd8c3784fc14d0bf0d53639e1ad4d done
+#13 exporting layers 0.8s done
+#13 writing image sha256:6477a6d128ef48d424822f82872a78f3ad4d05dd60dd6b7aa04159a383ebb285
+#13 writing image sha256:6477a6d128ef48d424822f82872a78f3ad4d05dd60dd6b7aa04159a383ebb285 done
 #13 naming to docker.io/sujanchow/serverus-ai:v1 done
-#13 DONE 0.7s
+#13 DONE 0.8s
 
-View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/o7o5lvlfk2kb29sstzhtt225c
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/w4wy6eztyq45t6dbatzbmtc6q
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
@@ -408,26 +406,32 @@ View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux
 + DOCKER_SOCK=/Users/jsujanchowdary/.docker/run/docker.sock
 + /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux run --rm -v /Users/jsujanchowdary/.docker/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity CRITICAL,HIGH --exit-code 0 sujanchow/serverus-ai:v1
 + tee trivy-report.txt
-2026-01-30T20:38:10Z	INFO	[vulndb] Need to update DB
-2026-01-30T20:38:10Z	INFO	[vulndb] Downloading vulnerability DB...
-2026-01-30T20:38:10Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
-1.94 MiB / 83.75 MiB [->_____________________________________________________________] 2.31% ? p/s ?7.98 MiB / 83.75 MiB [------>________________________________________________________] 9.53% ? p/s ?16.45 MiB / 83.75 MiB [----------->_________________________________________________] 19.65% ? p/s ?23.16 MiB / 83.75 MiB [------------->__________________________________] 27.65% 35.37 MiB p/s ETA 1s31.43 MiB / 83.75 MiB [------------------>_____________________________] 37.52% 35.37 MiB p/s ETA 1s37.98 MiB / 83.75 MiB [--------------------->__________________________] 45.34% 35.37 MiB p/s ETA 1s42.82 MiB / 83.75 MiB [------------------------>_______________________] 51.13% 35.21 MiB p/s ETA 1s47.40 MiB / 83.75 MiB [--------------------------->____________________] 56.59% 35.21 MiB p/s ETA 1s51.35 MiB / 83.75 MiB [----------------------------->__________________] 61.31% 35.21 MiB p/s ETA 0s55.71 MiB / 83.75 MiB [------------------------------->________________] 66.52% 34.32 MiB p/s ETA 0s60.02 MiB / 83.75 MiB [---------------------------------->_____________] 71.67% 34.32 MiB p/s ETA 0s64.39 MiB / 83.75 MiB [------------------------------------>___________] 76.89% 34.32 MiB p/s ETA 0s68.69 MiB / 83.75 MiB [--------------------------------------->________] 82.02% 33.50 MiB p/s ETA 0s73.09 MiB / 83.75 MiB [----------------------------------------->______] 87.28% 33.50 MiB p/s ETA 0s76.87 MiB / 83.75 MiB [-------------------------------------------->___] 91.79% 33.50 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.96 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.96 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.96 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.84 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.84 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.84 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.85 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.85 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.85 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 26.99 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [-------------------------------------------------] 100.00% 17.25 MiB p/s 5.1s2026-01-30T20:38:16Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
-2026-01-30T20:38:16Z	INFO	[vuln] Vulnerability scanning is enabled
-2026-01-30T20:38:16Z	INFO	[secret] Secret scanning is enabled
-2026-01-30T20:38:16Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
-2026-01-30T20:38:16Z	INFO	[secret] Please see https://trivy.dev/docs/v0.68/guide/scanner/secret#recommendation for faster secret detection
-2026-01-30T20:38:27Z	INFO	[python] Licenses acquired from one or more METADATA files may be subject to additional terms. Use `--debug` flag to see all affected packages.
-2026-01-30T20:38:27Z	WARN	Third-party SBOM may lead to inaccurate vulnerability detection
-2026-01-30T20:38:27Z	WARN	Recommend using Trivy to generate SBOMs
-2026-01-30T20:38:27Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="usr/local/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
-2026-01-30T20:38:29Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/lib/python3.14/site-packages/pydeck/nbextension/static/index.js.map" size (MB)=11
-2026-01-30T20:38:30Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
-2026-01-30T20:38:31Z	INFO	Detected OS	family="debian" version="13.3"
-2026-01-30T20:38:31Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=115
-2026-01-30T20:38:31Z	INFO	Number of language-specific files	num=1
-2026-01-30T20:38:31Z	INFO	[python-pkg] Detecting vulnerabilities...
-2026-01-30T20:38:31Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.68/guide/scanner/vulnerability#severity-selection for details.
-2026-01-30T20:38:31Z	INFO	Table result includes only package filenames. Use '--format json' option to get the full path to the package file.
+2026-01-30T20:55:21Z	INFO	[vulndb] Need to update DB
+2026-01-30T20:55:21Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-01-30T20:55:21Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2.06 MiB / 83.75 MiB [->_____________________________________________________________] 2.46% ? p/s ?10.06 MiB / 83.75 MiB [------->_____________________________________________________] 12.01% ? p/s ?15.94 MiB / 83.75 MiB [----------->_________________________________________________] 19.03% ? p/s ?24.41 MiB / 83.75 MiB [------------->__________________________________] 29.14% 37.13 MiB p/s ETA 1s28.67 MiB / 83.75 MiB [---------------->_______________________________] 34.24% 37.13 MiB p/s ETA 1s32.67 MiB / 83.75 MiB [------------------>_____________________________] 39.01% 37.13 MiB p/s ETA 1s40.62 MiB / 83.75 MiB [----------------------->________________________] 48.51% 36.48 MiB p/s ETA 1s44.97 MiB / 83.75 MiB [------------------------->______________________] 53.70% 36.48 MiB p/s ETA 1s49.03 MiB / 83.75 MiB [---------------------------->___________________] 58.55% 36.48 MiB p/s ETA 0s53.86 MiB / 83.75 MiB [------------------------------>_________________] 64.31% 35.54 MiB p/s ETA 0s57.92 MiB / 83.75 MiB [--------------------------------->______________] 69.16% 35.54 MiB p/s ETA 0s62.05 MiB / 83.75 MiB [----------------------------------->____________] 74.09% 35.54 MiB p/s ETA 0s66.11 MiB / 83.75 MiB [------------------------------------->__________] 78.94% 34.57 MiB p/s ETA 0s69.88 MiB / 83.75 MiB [---------------------------------------->_______] 83.44% 34.57 MiB p/s ETA 0s73.97 MiB / 83.75 MiB [------------------------------------------>_____] 88.32% 34.57 MiB p/s ETA 0s78.41 MiB / 83.75 MiB [-------------------------------------------->___] 93.62% 33.66 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 33.66 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 33.66 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.07 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.07 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.07 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.00 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.00 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.00 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.06 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.06 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [-------------------------------------------------] 100.00% 16.10 MiB p/s 5.4s2026-01-30T20:55:28Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-01-30T20:55:28Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-01-30T20:55:28Z	INFO	[secret] Secret scanning is enabled
+2026-01-30T20:55:28Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-01-30T20:55:28Z	INFO	[secret] Please see https://trivy.dev/docs/v0.68/guide/scanner/secret#recommendation for faster secret detection
+2026-01-30T20:55:38Z	INFO	[python] Licenses acquired from one or more METADATA files may be subject to additional terms. Use `--debug` flag to see all affected packages.
+2026-01-30T20:55:38Z	WARN	Third-party SBOM may lead to inaccurate vulnerability detection
+2026-01-30T20:55:38Z	WARN	Recommend using Trivy to generate SBOMs
+2026-01-30T20:55:39Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="usr/local/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
+2026-01-30T20:55:40Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/lib/python3.14/site-packages/pydeck/nbextension/static/index.js.map" size (MB)=11
+2026-01-30T20:55:41Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
+2026-01-30T20:55:42Z	INFO	Detected OS	family="debian" version="13.3"
+2026-01-30T20:55:42Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=115
+2026-01-30T20:55:42Z	INFO	Number of language-specific files	num=1
+2026-01-30T20:55:42Z	INFO	[python-pkg] Detecting vulnerabilities...
+2026-01-30T20:55:42Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.68/guide/scanner/vulnerability#severity-selection for details.
+2026-01-30T20:55:42Z	INFO	Table result includes only package filenames. Use '--format json' option to get the full path to the package file.
+
+📣 [34mNotices:[0m
+  - Version 0.69.0 of Trivy is now available, current version is 0.68.2
+
+To suppress version checks, run Trivy scans with the --skip-version-check flag
+
 
 Report Summary
 
@@ -496,13 +500,7 @@ Report Summary
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
 │ app/venv/lib/python3.14/site-packages/python_dotenv-1.2.1.dist-info/METADATA     │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
-│ app/venv/lib/python3.14/site-packages/pytz-2025.2.dist-info/METADATA             �
-📣 [34mNotices:[0m
-  - Version 0.69.0 of Trivy is now available, current version is 0.68.2
-
-To suppress version checks, run Trivy scans with the --skip-version-check flag
-
-� python-pkg │        0        │    -    │
+│ app/venv/lib/python3.14/site-packages/pytz-2025.2.dist-info/METADATA             │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
 │ app/venv/lib/python3.14/site-packages/referencing-0.37.0.dist-info/METADATA      │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
@@ -751,8 +749,8 @@ Recording fingerprints
 👉 Push attempt 1...
 + /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/serverus-ai:v1
 The push refers to repository [docker.io/sujanchow/serverus-ai]
-64158960d4ec: Preparing
-3eff9f2d0b57: Preparing
+857e65159195: Preparing
+0667325a63a9: Preparing
 e20a16f530a4: Preparing
 17c99f5d622a: Preparing
 d79850edf659: Preparing
@@ -761,22 +759,22 @@ d79850edf659: Preparing
 76c58cdecda3: Preparing
 188b50d8162b: Preparing
 37127a0fa4c7: Preparing
+9d94a520dea6: Waiting
 14560f658b88: Waiting
 76c58cdecda3: Waiting
 188b50d8162b: Waiting
 37127a0fa4c7: Waiting
-9d94a520dea6: Waiting
+17c99f5d622a: Layer already exists
 d79850edf659: Layer already exists
 e20a16f530a4: Layer already exists
-17c99f5d622a: Layer already exists
 9d94a520dea6: Layer already exists
+14560f658b88: Layer already exists
+188b50d8162b: Layer already exists
 76c58cdecda3: Layer already exists
 37127a0fa4c7: Layer already exists
-188b50d8162b: Layer already exists
-14560f658b88: Layer already exists
-64158960d4ec: Pushed
-3eff9f2d0b57: Pushed
-v1: digest: sha256:881b249ae2e6d3918f0ac1bc29512399f040368feaa9b8e6e3fb5cab7cfcda8e size: 2416
+857e65159195: Pushed
+0667325a63a9: Pushed
+v1: digest: sha256:dacdc5f151e59978dc62e920f7ac27c0b9c2df3294872f1da4cb61c4bdaba328 size: 2416
 + echo '✅ Docker push succeeded'
 ✅ Docker push succeeded
 + exit 0
@@ -796,14 +794,11 @@ v1: digest: sha256:881b249ae2e6d3918f0ac1bc29512399f040368feaa9b8e6e3fb5cab7cfcd
 #1 transferring dockerfile: 461B done
 #1 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/ubuntu:22.04
-#2 ...
+#2 [auth] library/ubuntu:pull token for registry-1.docker.io
+#2 DONE 0.0s
 
-#3 [auth] library/ubuntu:pull token for registry-1.docker.io
-#3 DONE 0.0s
-
-#2 [internal] load metadata for docker.io/library/ubuntu:22.04
-#2 DONE 2.5s
+#3 [internal] load metadata for docker.io/library/ubuntu:22.04
+#3 DONE 2.3s
 
 #4 [internal] load .dockerignore
 #4 transferring context: 2B done
@@ -816,13 +811,13 @@ v1: digest: sha256:881b249ae2e6d3918f0ac1bc29512399f040368feaa9b8e6e3fb5cab7cfcd
 #6 transferring context: 35B done
 #6 DONE 0.0s
 
-#7 [2/5] RUN apt-get update &&     apt-get install -y curl bash ca-certificates &&     curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl &&     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl &&     rm -rf /var/lib/apt/lists/* kubectl
+#7 [4/5] COPY stress_pod.sh .
 #7 CACHED
 
-#8 [3/5] WORKDIR /stress
+#8 [2/5] RUN apt-get update &&     apt-get install -y curl bash ca-certificates &&     curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl &&     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl &&     rm -rf /var/lib/apt/lists/* kubectl
 #8 CACHED
 
-#9 [4/5] COPY stress_pod.sh .
+#9 [3/5] WORKDIR /stress
 #9 CACHED
 
 #10 [5/5] RUN chmod +x stress_pod.sh
@@ -835,7 +830,7 @@ v1: digest: sha256:881b249ae2e6d3918f0ac1bc29512399f040368feaa9b8e6e3fb5cab7cfcd
 #11 naming to docker.io/sujanchow/stress-pod:latest done
 #11 DONE 0.0s
 
-View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/zv4so0aqz4l4io46wrmqak58w
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/764os7j9kkmz5dbid2fuina4n
 + echo '✅ Stress-pod image built successfully'
 ✅ Stress-pod image built successfully
 [Pipeline] }
@@ -853,11 +848,11 @@ The push refers to repository [docker.io/sujanchow/stress-pod]
 0fb6459bab15: Preparing
 d9e0617b46d5: Preparing
 168d3f8561df: Preparing
-168d3f8561df: Layer already exists
-9cd07d0f298e: Layer already exists
-0fb6459bab15: Layer already exists
-6d592cbf40d6: Layer already exists
 d9e0617b46d5: Layer already exists
+9cd07d0f298e: Layer already exists
+6d592cbf40d6: Layer already exists
+168d3f8561df: Layer already exists
+0fb6459bab15: Layer already exists
 v1: digest: sha256:996300b783c776109535ad40c99fcd4a9cd779cd90009beb1c20811e8168e8d9 size: 1363
 + /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/stress-pod:latest
 The push refers to repository [docker.io/sujanchow/stress-pod]
@@ -866,11 +861,11 @@ The push refers to repository [docker.io/sujanchow/stress-pod]
 0fb6459bab15: Preparing
 d9e0617b46d5: Preparing
 168d3f8561df: Preparing
-9cd07d0f298e: Layer already exists
-6d592cbf40d6: Layer already exists
-d9e0617b46d5: Layer already exists
-0fb6459bab15: Layer already exists
 168d3f8561df: Layer already exists
+9cd07d0f298e: Layer already exists
+d9e0617b46d5: Layer already exists
+6d592cbf40d6: Layer already exists
+0fb6459bab15: Layer already exists
 latest: digest: sha256:996300b783c776109535ad40c99fcd4a9cd779cd90009beb1c20811e8168e8d9 size: 1363
 + echo '✅ Stress-pod image pushed successfully'
 ✅ Stress-pod image pushed successfully
@@ -885,16 +880,23 @@ latest: digest: sha256:996300b783c776109535ad40c99fcd4a9cd779cd90009beb1c20811e8
 + /Applications/Docker.app/Contents/Resources/bin/kubectl delete job stress-pod --ignore-not-found=true
 job.batch "stress-pod" deleted from default namespace
 + /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --set image.repository=sujanchow/serverus-ai --set image.tag=v1
-I0131 02:09:19.895695   77087 warnings.go:110] "Warning: spec.template.spec.containers[1].ports[0]: duplicate port definition with spec.template.spec.containers[0].ports[1]"
-I0131 02:09:19.895737   77087 warnings.go:110] "Warning: spec.template.spec.containers[1].ports[0]: duplicate port name \"metrics\" with spec.template.spec.containers[0].ports[1], services and probes that select ports by name will use spec.template.spec.containers[0].ports[1]"
+I0131 02:26:47.456195   79644 warnings.go:110] "Warning: spec.template.spec.containers[1].ports[0]: duplicate port definition with spec.template.spec.containers[0].ports[1]"
+I0131 02:26:47.456239   79644 warnings.go:110] "Warning: spec.template.spec.containers[1].ports[0]: duplicate port name \"metrics\" with spec.template.spec.containers[0].ports[1], services and probes that select ports by name will use spec.template.spec.containers[0].ports[1]"
 Release "severus-ai" has been upgraded. Happy Helming!
 NAME: severus-ai
-LAST DEPLOYED: Sat Jan 31 02:09:19 2026
+LAST DEPLOYED: Sat Jan 31 02:26:47 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 53
+REVISION: 55
 DESCRIPTION: Upgrade complete
 TEST SUITE: None
++ echo '⏳ Waiting for rollout to complete (Ensuring No 503 during tests)...'
+⏳ Waiting for rollout to complete (Ensuring No 503 during tests)...
++ /Applications/Docker.app/Contents/Resources/bin/kubectl rollout status deployment/severus-ai --timeout=120s
+Waiting for deployment "severus-ai" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "severus-ai" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "severus-ai" rollout to finish: 1 old replicas are pending termination...
+deployment "severus-ai" successfully rolled out
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
@@ -929,25 +931,25 @@ TEST SUITE: None
 + echo '🧠 Testing Ollama connectivity (NON-BLOCKING)'
 🧠 Testing Ollama connectivity (NON-BLOCKING)
 ++ /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai --field-selector=status.phase=Running -o 'jsonpath={.items[0].metadata.name}'
-+ POD=severus-ai-6698c4c755-w5fs4
-+ '[' -z severus-ai-6698c4c755-w5fs4 ']'
-+ echo 'Using pod: severus-ai-6698c4c755-w5fs4'
-Using pod: severus-ai-6698c4c755-w5fs4
-+ /Applications/Docker.app/Contents/Resources/bin/kubectl exec severus-ai-6698c4c755-w5fs4 -- curl -s --max-time 5 http://host.docker.internal:11434/api/tags
-Defaulted container "severus-ai" out of: severus-ai, metrics-exporter
 + echo '🩺 Checking Kubernetes health...'
 🩺 Checking Kubernetes health...
-+ /Applications/Docker.app/Contents/Resources/bin/kubectl rollout status deployment/severus-ai --timeout=120s
-deployment "severus-ai" successfully rolled out
 + /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai
-NAME                          READY   STATUS        RESTARTS   AGE
-severus-ai-6698c4c755-w5fs4   2/2     Running       0          2s
-severus-ai-6cf5d769c9-l882c   2/2     Terminating   0          22m
 + echo '📜 Checking logs...'
 📜 Checking logs...
 + /Applications/Docker.app/Contents/Resources/bin/kubectl logs deployment/severus-ai
 + tail -n 50
-Found 2 pods, using pod/severus-ai-6cf5d769c9-l882c
++ POD=severus-ai-8466b6f775-mcbq8
++ '[' -z severus-ai-8466b6f775-mcbq8 ']'
++ echo 'Using pod: severus-ai-8466b6f775-mcbq8'
+Using pod: severus-ai-8466b6f775-mcbq8
++ /Applications/Docker.app/Contents/Resources/bin/kubectl exec severus-ai-8466b6f775-mcbq8 -- curl -s --max-time 5 http://host.docker.internal:11434/api/tags
+Defaulted container "severus-ai" out of: severus-ai, metrics-exporter
++ mkdir -p k3s-validation-logs
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.26
+NAME                          READY   STATUS    RESTARTS   AGE
+severus-ai-8466b6f775-mcbq8   2/2     Running   0          20s
+[Pipeline] }
 Defaulted container "severus-ai" out of: severus-ai, metrics-exporter
 🚀 Starting Severus AI with metrics...
 
@@ -958,29 +960,22 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 
   URL: http://0.0.0.0:8501
 
-[2026-01-30 20:21:04,669] [INFO] auth - User signed up: testuser
-[2026-01-30 20:21:20,097] [INFO] auth - User logged in: testuser
-[2026-01-30 20:21:27,315] [INFO] chat - Chat created: 1 for testuser
-  Stopping...
+[Pipeline] // stage
 [Pipeline] }
-+ mkdir -p k3s-validation-logs
-+ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
-+ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.26
+[Pipeline] }
 level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+{"models":[{"name":"gemma3:1b","model":"gemma3:1b","modified_at":"2026-01-20T20:43:28.370933516+05:30","size":815319791,"digest":"8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc","details":{"parent_model":"","format":"gguf","family":"gemma3","families":["gemma3"],"parameter_size":"999.89M","quantization_level":"Q4_K_M"}},{"name":"llama3:latest","model":"llama3:latest","modified_at":"2024-09-11T09:02:22.520828542+05:30","size":4661224676,"digest":"365c0bd3c000a25d28ddbf732fe1c6add414de7275464c4e4d1c3b5fcb5d8ad1","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}},{"name":"llama3.1:latest","model":"llama3.1:latest","modified_at":"2024-09-11T08:41:16.857717856+05:30","size":4661230766,"digest":"42182419e9508c30c4b1fe55015f06b65f4ca4b9e28a744be55008d21998a093","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}}]}+ echo '✅ Ollama reachable'
+✅ Ollama reachable
++ exit 0
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
 level=DEBUG msg="getting history for release" release=severus-ai
 level=DEBUG msg="preparing upgrade" name=severus-ai
 level=DEBUG msg="number of dependencies in the chart" dependencies=0
 level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
-[Pipeline] }
-[Pipeline] // stage
-[Pipeline] // stage
-[Pipeline] }
-[Pipeline] }
-{"models":[{"name":"gemma3:1b","model":"gemma3:1b","modified_at":"2026-01-20T20:43:28.370933516+05:30","size":815319791,"digest":"8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc","details":{"parent_model":"","format":"gguf","family":"gemma3","families":["gemma3"],"parameter_size":"999.89M","quantization_level":"Q4_K_M"}},{"name":"llama3:latest","model":"llama3:latest","modified_at":"2024-09-11T09:02:22.520828542+05:30","size":4661224676,"digest":"365c0bd3c000a25d28ddbf732fe1c6add414de7275464c4e4d1c3b5fcb5d8ad1","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}},{"name":"llama3.1:latest","model":"llama3.1:latest","modified_at":"2024-09-11T08:41:16.857717856+05:30","size":4661230766,"digest":"42182419e9508c30c4b1fe55015f06b65f4ca4b9e28a744be55008d21998a093","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}}]}+ echo '✅ Ollama reachable'
-✅ Ollama reachable
-+ exit 0
-[Pipeline] }
-[Pipeline] // stage
 level=DEBUG msg="performing update" name=severus-ai
 level=DEBUG msg="dry run for release" name=severus-ai
 + for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
@@ -988,7 +983,6 @@ level=DEBUG msg="dry run for release" name=severus-ai
 level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
 level=DEBUG msg="getting history for release" release=severus-ai
 level=DEBUG msg="preparing upgrade" name=severus-ai
-[Pipeline] }
 level=DEBUG msg="number of dependencies in the chart" dependencies=0
 level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
 level=DEBUG msg="performing update" name=severus-ai
@@ -1075,34 +1069,370 @@ Recording fingerprints
 + curl --retry 5 --retry-delay 2 --fail -H 'Host: severus-ai.local' http://127.0.0.1:8081
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-curl: (22) The requested URL returned error: 503
-Warning: Problem : HTTP error. Will retry in 2 seconds. 5 retries left.
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-curl: (22) The requested URL returned error: 503
-Warning: Problem : HTTP error. Will retry in 2 seconds. 4 retries left.
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-curl: (22) The requested URL returned error: 503
-Warning: Problem : HTTP error. Will retry in 2 seconds. 3 retries left.
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-curl: (22) The requested URL returned error: 503
-Warning: Problem : HTTP error. Will retry in 2 seconds. 2 retries left.
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-curl: (22) The requested URL returned error: 503
-Warning: Problem : HTTP error. Will retry in 2 seconds. 1 retries left.
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-curl: (22) The requested URL returned error: 503
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1522    0  1522    0     0  62757      0 --:--:-- --:--:-- --:--:-- 63416
+<!--
+ Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2026)
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="shortcut icon" href="./favicon.png" />
+    <link
+      rel="preload"
+      href="./static/media/SourceSansVF-Upright.ttf.BsWL4Kly.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <title>Streamlit</title>
+
+    <!-- initialize window.prerenderReady to false and then set to true in React app when app is ready for indexing -->
+    <script>
+      window.prerenderReady = false
+    </script>
+    <script type="module" crossorigin src="./static/js/index.DSTThs-t.js"></script>
+    <link rel="stylesheet" crossorigin href="./static/css/index.BUP6fTcR.css">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
++ echo '✅ Ingress reachable via Traefik'
+✅ Ingress reachable via Traefik
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] }
-Failed in branch Ingress Reachability Test
 [Pipeline] // parallel
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
 [Pipeline] { (Stress Test)
-Stage "Stress Test" skipped due to earlier failure(s)
-[Pipeline] getContext
+[Pipeline] sh
++ set -euo pipefail
++ echo '🔥 Starting Stress Test...'
+🔥 Starting Stress Test...
++ /Applications/Docker.app/Contents/Resources/bin/kubectl delete job stress-pod --ignore-not-found=true
+job.batch "stress-pod" deleted from default namespace
++ sleep 5
++ echo 'Deploying stress test job...'
+Deploying stress test job...
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set stress.enabled=true
+Release "severus-ai" has been upgraded. Happy Helming!
+NAME: severus-ai
+LAST DEPLOYED: Sat Jan 31 02:27:19 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 56
+DESCRIPTION: Upgrade complete
+TEST SUITE: None
++ echo 'Waiting for stress test job to start...'
+Waiting for stress test job to start...
++ sleep 10
++ echo 'Monitoring stress test progress...'
+Monitoring stress test progress...
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (1/60)'
+Stress test still running... (1/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (2/60)'
+Stress test still running... (2/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (3/60)'
+Stress test still running... (3/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (4/60)'
+Stress test still running... (4/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (5/60)'
+Stress test still running... (5/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (6/60)'
+Stress test still running... (6/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (7/60)'
+Stress test still running... (7/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (8/60)'
+Stress test still running... (8/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Stress test still running... (9/60)'
+Stress test still running... (9/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=True
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' True = True ']'
++ echo '✅ Stress test completed successfully'
+✅ Stress test completed successfully
++ break
++ echo ''
+
++ echo ==============================================
+==============================================
++ echo 'STRESS TEST LOGS'
+STRESS TEST LOGS
++ echo ==============================================
+==============================================
++ /Applications/Docker.app/Contents/Resources/bin/kubectl logs job/stress-pod
+Waiting for target to be ready: http://severus-ai:8501
+✅ Target is ready: http://severus-ai:8501
+
+==============================================
+STRESS TEST STARTED at Fri Jan 30 20:57:22 UTC 2026
+Targets            : http://severus-ai:8501
+Requests per run   : 2000
+Concurrency        : 150
+Runs               : 10
+Sleep between runs : 2s
+==============================================
+
+----------------------------------------------
+RUN 1 of 10 started at Fri Jan 30 20:57:22 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 1 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 2 of 10 started at Fri Jan 30 20:57:28 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 2 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 3 of 10 started at Fri Jan 30 20:57:34 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 3 COMPLETED
+Time taken : 5s
+
+----------------------------------------------
+RUN 4 of 10 started at Fri Jan 30 20:57:41 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 4 COMPLETED
+Time taken : 3s
+
+----------------------------------------------
+RUN 5 of 10 started at Fri Jan 30 20:57:46 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 5 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 6 of 10 started at Fri Jan 30 20:57:52 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 6 COMPLETED
+Time taken : 3s
+
+----------------------------------------------
+RUN 7 of 10 started at Fri Jan 30 20:57:57 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 7 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 8 of 10 started at Fri Jan 30 20:58:03 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 8 COMPLETED
+Time taken : 3s
+
+----------------------------------------------
+RUN 9 of 10 started at Fri Jan 30 20:58:08 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 9 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 10 of 10 started at Fri Jan 30 20:58:14 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 10 COMPLETED
+Time taken : 4s
+Waiting 30 seconds for final metrics collection...
+
+==============================================
+ALL RUNS COMPLETED
+Success requests     : 20000
+Failed requests      : 0
+Total execution time : 86s
+==============================================
+
+==============================================
+RESOURCE USAGE SUMMARY (PEAK)
+==============================================
+Pod: alertmanager-kube-prometheus-stack-alertmanager-0 CPU_peak=2m Memory_peak=54Mi
+Pod: severus-ai-8466b6f775-mcbq8         CPU_peak=78m Memory_peak=62Mi
+Pod: kube-prometheus-stack-kube-state-metrics-774cbcbd5-8n9nd CPU_peak=2m Memory_peak=27Mi
+Pod: severus-ai-8466b6f775-n5ghv         CPU_peak=64m Memory_peak=51Mi
+Pod: kube-prometheus-stack-grafana-54f55c8d64-rj5mc CPU_peak=9m Memory_peak=295Mi
+Pod: stress-pod-ktsw4                    CPU_peak=5m Memory_peak=12Mi
+Pod: severus-ai-8466b6f775-fg46v         CPU_peak=64m Memory_peak=51Mi
+Pod: severus-ai-8466b6f775-zngp8         CPU_peak=63m Memory_peak=51Mi
+Pod: kube-prometheus-stack-prometheus-node-exporter-gc4pd CPU_peak=3m Memory_peak=16Mi
+Pod: kube-prometheus-stack-operator-6d75b94c6d-l6jbg CPU_peak=4m Memory_peak=38Mi
+Pod: stress-pod-2kpdp                    CPU_peak=2832m Memory_peak=6Mi
+Pod: severus-ai-8466b6f775-bsmlb         CPU_peak=60m Memory_peak=51Mi
+Pod: prometheus-kube-prometheus-stack-prometheus-0 CPU_peak=22m Memory_peak=487Mi
+
+Validation started
+----------------------------------------------
+Service label       : app=severus-ai
+Running pods        : 5
+✅ Pods are running for label: app=severus-ai
+
+📊 Verifying requests in pod logs...
+----------------------------------------------
+Pod: severus-ai-8466b6f775-bsmlb → GET requests in logs: 0
+Pod: severus-ai-8466b6f775-fg46v → GET requests in logs: 0
+Pod: severus-ai-8466b6f775-mcbq8 → GET requests in logs: 0
+Pod: severus-ai-8466b6f775-n5ghv → GET requests in logs: 0
+Pod: severus-ai-8466b6f775-zngp8 → GET requests in logs: 0
+----------------------------------------------
+Total GET requests in logs : 0
+Expected from stress test  : 20000
+⚠️  No GET requests found in logs (Streamlit may not log all requests)
+----------------------------------------------
+Overall validation status : PASS
+
+✅ STRESS TEST COMPLETED SUCCESSFULLY
++ echo ''
+
++ echo ==============================================
+==============================================
++ echo 'HPA STATUS'
+HPA STATUS
++ echo ==============================================
+==============================================
++ /Applications/Docker.app/Contents/Resources/bin/kubectl get hpa severus-ai-hpa
+NAME             REFERENCE               TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+severus-ai-hpa   Deployment/severus-ai   cpu: 4%/50%   1         5         5          28h
++ echo ''
+
++ echo ==============================================
+==============================================
++ echo 'POD STATUS'
+POD STATUS
++ echo ==============================================
+==============================================
++ /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai
+NAME                          READY   STATUS    RESTARTS   AGE
+severus-ai-8466b6f775-bsmlb   2/2     Running   0          93s
+severus-ai-8466b6f775-fg46v   2/2     Running   0          78s
+severus-ai-8466b6f775-mcbq8   2/2     Running   0          2m14s
+severus-ai-8466b6f775-n5ghv   2/2     Running   0          93s
+severus-ai-8466b6f775-zngp8   2/2     Running   0          93s
++ echo ''
+
++ echo '✅ Stress test stage completed'
+✅ Stress test stage completed
+Post stage
+[Pipeline] sh
++ /Applications/Docker.app/Contents/Resources/bin/kubectl logs job/stress-pod
++ /Applications/Docker.app/Contents/Resources/bin/kubectl describe hpa severus-ai-hpa
+[Pipeline] archiveArtifacts
+Archiving artifacts
+Recording fingerprints
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] }
@@ -1112,5 +1442,4 @@ Stage "Stress Test" skipped due to earlier failure(s)
 [Pipeline] }
 [Pipeline] // node
 [Pipeline] End of Pipeline
-ERROR: script returned exit code 22
-Finished: FAILURE
+Finished: SUCCESS
