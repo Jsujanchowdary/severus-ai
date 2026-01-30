@@ -44,6 +44,10 @@ pipeline {
                 sh '''
                     set -euo pipefail
                     echo "📊 Deploying Prometheus and Grafana stack..."
+                    # Cleanup potentially conflicting webhooks from previous runs
+                    $KUBECTL_BIN delete mutatingwebhookconfiguration kube-prometheus-stack-admission --ignore-not-found=true
+                    $KUBECTL_BIN delete validatingwebhookconfiguration kube-prometheus-stack-admission --ignore-not-found=true
+
                     $HELM_BIN upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
                         --namespace default \
                         --set grafana.adminPassword=admin123 \
