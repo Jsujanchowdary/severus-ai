@@ -50,6 +50,9 @@ pipeline {
                         --set grafana.ingress.enabled=true \
                         --set grafana.ingress.ingressClassName=traefik \
                         --set grafana.ingress.hosts[0]=grafana.local \
+                        --set prometheus.ingress.enabled=true \
+                        --set prometheus.ingress.ingressClassName=traefik \
+                        --set prometheus.ingress.hosts[0]=prometheus.local \
                         --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
                 '''
             }
