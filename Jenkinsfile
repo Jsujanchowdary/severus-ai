@@ -403,12 +403,12 @@ pipeline {
 
         /* ================= STRESS TEST ================= */
 
-        stage('Stress Test') {
+        stage('Performance Evaluation') {
             steps {
                 sh '''
                     set -euo pipefail
                     
-                    echo "🔥 Starting Stress Test..."
+                    echo "🔥 Starting Performance Evaluation..."
                     
                     # Delete previous stress test job if exists
                     $KUBECTL_BIN delete job stress-pod --ignore-not-found=true
@@ -424,25 +424,25 @@ pipeline {
                       --set stress.enabled=true
                     
                     # Wait for job to start
-                    echo "Waiting for stress test job to start..."
+                    echo "Waiting for performance evaluation job to start..."
                     sleep 10
                     
                     # Monitor job status
-                    echo "Monitoring stress test progress..."
+                    echo "Monitoring performance evaluation progress..."
                     for i in {1..60}; do
                       STATUS=$($KUBECTL_BIN get job stress-pod -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || echo "")
                       FAILED=$($KUBECTL_BIN get job stress-pod -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || echo "")
                       
                       if [ "$STATUS" = "True" ]; then
-                        echo "✅ Stress test completed successfully"
+                        echo "✅ Performance Evaluation completed successfully"
                         break
                       elif [ "$FAILED" = "True" ]; then
-                        echo "❌ Stress test failed"
+                        echo "❌ Performance Evaluation failed"
                         $KUBECTL_BIN logs job/stress-pod || true
                         exit 1
                       fi
                       
-                      echo "Stress test still running... ($i/60)"
+                      echo "Performance Evaluation still running... ($i/60)"
                       sleep 10
                     done
                     
@@ -468,7 +468,7 @@ pipeline {
                     $KUBECTL_BIN get pods -l app=severus-ai
                     
                     echo ""
-                    echo "✅ Stress test stage completed"
+                    echo "✅ Performance Evaluation stage completed"
                 '''
             }
             post {
