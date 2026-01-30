@@ -82,3 +82,13 @@ stress:
 rbac:
   create: true
   serviceAccountName: stress-sa
+
+# ------------------------
+# Monitoring & Observability
+# ------------------------
+monitoring:
+  enabled: true
+  scrapeInterval: 30s
+  metricsPort: 8000
+  serviceMonitor:
+    enabled: true  # Prometheus Operator is installed

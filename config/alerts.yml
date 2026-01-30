@@ -1,0 +1,93 @@
+# Prometheus Alert Rules for Severus AI
+
+groups:
+  - name: severus_ai_alerts
+    interval: 30s
+    rules:
+      # Pod down alert
+      - alert: SeverusAIPodDown
+        expr: up{app="severus-ai"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: severus-ai
+        annotations:
+          summary: "Severus AI pod is down"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been down for more than 1 minute."
+
+      # High CPU usage
+      - alert: SeverusAIHighCPU
+        expr: rate(process_cpu_seconds_total{app="severus-ai"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: severus-ai
+        annotations:
+          summary: "High CPU usage on Severus AI"
+          description: "Pod {{ $labels.pod }} is using more than 80% CPU for 5 minutes."
+
+      # High memory usage
+      - alert: SeverusAIHighMemory
+        expr: process_resident_memory_bytes{app="severus-ai"} / 1024 / 1024 > 400
+        for: 5m
+        labels:
+          severity: warning
+          component: severus-ai
+        annotations:
+          summary: "High memory usage on Severus AI"
+          description: "Pod {{ $labels.pod }} is using more than 400MB memory."
+
+      # High error rate
+      - alert: SeverusAIHighErrorRate
+        expr: rate(severus_errors_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: severus-ai
+        annotations:
+          summary: "High error rate in Severus AI"
+          description: "Error rate is {{ $value }} errors/second over the last 5 minutes."
+
+      # Ollama connection failures
+      - alert: SeverusAIOllamaFailures
+        expr: rate(severus_ollama_calls_total{status="error"}[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          component: ollama
+        annotations:
+          summary: "Ollama API failures detected"
+          description: "Ollama API is failing at {{ $value }} requests/second."
+
+      # No requests (application idle)
+      - alert: SeverusAINoRequests
+        expr: rate(severus_http_requests_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: info
+          component: severus-ai
+        annotations:
+          summary: "No requests to Severus AI"
+          description: "Application has received no requests for 10 minutes."
+
+      # High login failure rate
+      - alert: SeverusAIHighLoginFailures
+        expr: rate(severus_login_failures_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: auth
+        annotations:
+          summary: "High login failure rate"
+          description: "Login failures are occurring at {{ $value }} failures/second."
+
+      # Slow Ollama responses
+      - alert: SeverusAISlowOllama
+        expr: histogram_quantile(0.95, rate(severus_ollama_request_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          component: ollama
+        annotations:
+          summary: "Slow Ollama API responses"
+          description: "95th percentile of Ollama response time is {{ $value }}s (> 30s)."

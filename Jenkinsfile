@@ -26,6 +26,63 @@ pipeline {
             }
         }
 
+        /* ================= OBSERVABILITY SETUP ================= */
+
+        stage('Setup Monitoring Requirements') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "📥 Adding Prometheus Helm repository..."
+                    $HELM_BIN repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                    $HELM_BIN repo update
+                '''
+            }
+        }
+
+        stage('Deploy Monitoring Stack') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "📊 Deploying Prometheus and Grafana stack..."
+                    $HELM_BIN upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+                        --namespace default \
+                        --set grafana.adminPassword=admin123 \
+                        --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+                '''
+            }
+        }
+
+        stage('Configure Application Monitoring') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "🔧 Configuring application metrics discovery..."
+                    
+                    # Ensure ServiceMonitor is correctly labeled for Prometheus discovery
+                    # Using --overwrite to ensure the label is applied even if it's there
+                    $KUBECTL_BIN label servicemonitor severus-ai release=kube-prometheus-stack --overwrite || echo "⚠️ ServiceMonitor not found yet, will be applied during deployment"
+
+                    echo "📥 Importing Grafana Dashboard..."
+                    # Wait for Grafana to be ready
+                    sleep 10
+                    
+                    # Import dashboard via API using curl (more reliable in Jenkins)
+                    # We wrap the JSON in the format Grafana expects
+                    DASHBOARD_PATH="config/grafana-dashboard-application.json"
+                    
+                    if [ -f "$DASHBOARD_PATH" ]; then
+                        echo "Found dashboard file. Importing..."
+                        curl -u admin:admin123 -X POST \
+                            -H "Content-Type: application/json" \
+                            -d @$DASHBOARD_PATH \
+                            http://kube-prometheus-stack-grafana.default.svc.cluster.local/api/dashboards/db || echo "⚠️ Failed to import dashboard via internal URL, trying local port-forward fallback if in local mode"
+                    else
+                        echo "❌ Dashboard file not found at $DASHBOARD_PATH"
+                    fi
+                '''
+            }
+        }
+
         /* ================= BUILD ================= */
 
         stage('Application Build') {

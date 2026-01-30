@@ -2,10 +2,22 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "severus-ai.fullname" . }}
+  labels:
+    app: severus-ai
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
 spec:
   type: {{ .Values.service.type }}
   selector:
     app: severus-ai
   ports:
-    - port: {{ .Values.service.port }}
+    - name: http
+      port: {{ .Values.service.port }}
       targetPort: 8501
+      protocol: TCP
+    - name: metrics
+      port: 8000
+      targetPort: 8000
+      protocol: TCP

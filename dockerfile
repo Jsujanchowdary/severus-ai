@@ -14,6 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # App code
 COPY . .
 
-EXPOSE 8501
+# Make startup script executable
+RUN chmod +x start.sh
 
-CMD ["streamlit", "run", "app.py", "--server.address=0.0.0.0", "--server.port=8501", "sleep infinity"]
+EXPOSE 8501 8000
+
+CMD ["./start.sh"]

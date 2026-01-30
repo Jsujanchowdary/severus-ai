@@ -1,5 +1,29 @@
+"""
+Severus AI - Personal AI Assistant with Prometheus Monitoring
+"""
+
+import metrics
+import os
+import threading
+
+# Start background thread for uptime (multiprocess support)
+def uptime_updater():
+    import time
+    while True:
+        try:
+            metrics.update_uptime()
+        except:
+            pass
+        time.sleep(15)
+
+threading.Thread(target=uptime_updater, daemon=True).start()
+
+# ======================================================
+# STREAMLIT APPLICATION
+# ======================================================
 import streamlit as st
 from pathlib import Path
+import threading
 
 from storage import init_db
 from auth import signup, login
@@ -37,6 +61,17 @@ st.session_state.setdefault("upload_notice", {})  # chat_id -> str | None
 st.session_state.setdefault("files_to_process", None)  # TEMP buffer
 
 # ======================================================
+# TRACK GENERAL METRICS
+# ======================================================
+# Track page load as an HTTP request
+metrics.track_http_request("GET", "/", "200", 0.0)
+
+# Simplistic active user count (sessions)
+if "session_counted" not in st.session_state:
+    metrics.ACTIVE_USERS.inc()
+    st.session_state.session_counted = True
+
+# ======================================================
 # HEADER
 # ======================================================
 st.markdown(
@@ -62,10 +97,12 @@ if not st.session_state.authenticated:
             p = st.text_input("Password", type="password")
             if st.button("Login", use_container_width=True):
                 if login(u, p):
+                    metrics.track_login_success()
                     st.session_state.authenticated = True
                     st.session_state.username = u
                     st.rerun()
                 else:
+                    metrics.track_login_failure("invalid_credentials")
                     st.error("Invalid credentials")
 
         with tab2:
@@ -73,6 +110,7 @@ if not st.session_state.authenticated:
             p = st.text_input("New Password", type="password")
             if st.button("Create Account", use_container_width=True):
                 if signup(u, p):
+                    metrics.track_signup()
                     st.success("Account created. Login now.")
                 else:
                     st.error("Username already exists")
@@ -95,6 +133,7 @@ else:
 
     if st.sidebar.button("➕ New Chat", use_container_width=True):
         cid = create_chat(st.session_state.username)
+        metrics.track_chat_created()
         st.session_state.chat_id = cid
         st.session_state.has_document[cid] = False
         st.session_state.upload_notice[cid] = None
@@ -107,6 +146,7 @@ else:
             st.rerun()
         if c2.button("🗑️", key=f"del_{cid}"):
             delete_chat(cid)
+            metrics.track_chat_deleted()
             st.session_state.has_document.pop(cid, None)
             st.session_state.upload_notice.pop(cid, None)
             if st.session_state.chat_id == cid:
@@ -152,6 +192,15 @@ else:
         if uploaded_files:
             st.session_state.files_to_process = uploaded_files
 
+    # Simple mechanism to track currently active sessions in metrics
+    # This will increment on first load and we can use it to estimate activity
+    if "session_active_tracked" not in st.session_state:
+        metrics.ACTIVE_USERS.inc()
+        st.session_state.session_active_tracked = True
+
+    # Track page view
+    metrics.track_http_request("GET", "/", "200", 0.0)
+
     # ======================================================
     # PROCESS FILES (RUNS ONCE, SAFE)
     # ======================================================
@@ -161,6 +210,10 @@ else:
         for f in files:
             save_uploaded_file(chat_id, f)
             add_file_record(chat_id, f.name, f"data/uploads/{chat_id}/{f.name}")
+
+            # Track file upload by type
+            file_ext = f.name.split('.')[-1].lower()
+            metrics.track_file_upload(file_ext)
 
             if f.name.lower().endswith(("png", "jpg", "jpeg")):
                 st.session_state.upload_notice[chat_id] = "image"
@@ -181,6 +234,7 @@ else:
             else "📄 **Document uploaded successfully.**\n\nClick **Summarize Uploaded Document**."
         )
         save_message(chat_id, "assistant", msg)
+        metrics.track_message("assistant")
         st.session_state.upload_notice[chat_id] = None
         st.rerun()
 
@@ -197,14 +251,20 @@ else:
 
                 prompt = "Summarize the uploaded document clearly and concisely."
                 save_message(chat_id, "user", prompt)
+                metrics.track_message("user")
 
-                reply = chat_with_model(
-                    "gemma3:1b",
-                    get_messages(chat_id) + [("user", prompt)],
-                    chat_id=chat_id,
-                )
-
-                save_message(chat_id, "assistant", reply)
+                try:
+                    reply = chat_with_model(
+                        "gemma3:1b",
+                        get_messages(chat_id) + [("user", prompt)],
+                        chat_id=chat_id,
+                    )
+                    save_message(chat_id, "assistant", reply)
+                    metrics.track_message("assistant")
+                except Exception as e:
+                    metrics.track_error("ollama_error")
+                    st.error(f"Ollama error: {e}")
+                    st.stop()
 
             st.rerun()
 
@@ -228,12 +288,17 @@ else:
 
     if user_input:
         save_message(chat_id, "user", user_input)
+        metrics.track_message("user")
 
-        reply = chat_with_model(
-            "gemma3:1b",
-            get_messages(chat_id) + [("user", user_input)],
-            chat_id=chat_id,
-        )
-
-        save_message(chat_id, "assistant", reply)
+        try:
+            reply = chat_with_model(
+                "gemma3:1b",
+                get_messages(chat_id) + [("user", user_input)],
+                chat_id=chat_id,
+            )
+            save_message(chat_id, "assistant", reply)
+            metrics.track_message("assistant")
+        except Exception as e:
+            metrics.track_error("ollama_error")
+            st.error(f"Ollama error: {e}")
         st.rerun()

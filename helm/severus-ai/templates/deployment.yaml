@@ -10,16 +10,29 @@ spec:
     metadata:
       labels:
         app: severus-ai
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: severus-ai
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 8501
+            - name: http
+              containerPort: 8501
+              protocol: TCP
+            - name: metrics
+              containerPort: 8000
+              protocol: TCP
           env:
             - name: OLLAMA_BASE_URL
               value: {{ .Values.ollama.baseUrl }}
+            - name: prometheus_multiproc_dir
+              value: /app/data/metrics
+            - name: PROMETHEUS_MULTIPROC_DIR
+              value: /app/data/metrics
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -27,4 +40,40 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
-
+          volumeMounts:
+            - name: app-data
+              mountPath: /app/data
+        
+        # Metrics exporter sidecar
+        - name: metrics-exporter
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "🚀 Starting metrics exporter..."
+              cd /app
+              python3 metrics_exporter.py
+          env:
+            - name: prometheus_multiproc_dir
+              value: /app/data/metrics
+            - name: PROMETHEUS_MULTIPROC_DIR
+              value: /app/data/metrics
+          ports:
+            - name: metrics
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: app-data
+              mountPath: /app/data
+      
+      volumes:
+        - name: app-data
+          emptyDir: {}
