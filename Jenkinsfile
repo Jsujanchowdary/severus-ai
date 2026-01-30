@@ -53,6 +53,7 @@ pipeline {
                         --set prometheus.ingress.enabled=true \
                         --set prometheus.ingress.ingressClassName=traefik \
                         --set prometheus.ingress.hosts[0]=prometheus.local \
+                        --set prometheus.ingress.paths[0]=/ \
                         --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
                 '''
             }
