@@ -1,0 +1,1116 @@
+Started by user Sujan Chowdary
+Obtained Jenkinsfile from git https://github.com/Jsujanchowdary/severus-ai
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /Users/jsujanchowdary/.jenkins/workspace/severus-ai
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /Users/jsujanchowdary/.jenkins/workspace/severus-ai/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Jsujanchowdary/severus-ai # timeout=10
+Fetching upstream changes from https://github.com/Jsujanchowdary/severus-ai
+ > git --version # timeout=10
+ > git --version # 'git version 2.50.1 (Apple Git-155)'
+ > git fetch --tags --force --progress -- https://github.com/Jsujanchowdary/severus-ai +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 12c772e3ef1947acf2189d6839bc020d27e201d4 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 12c772e3ef1947acf2189d6839bc020d27e201d4 # timeout=10
+Commit message: "adding monitoring service"
+ > git rev-list --no-walk a7b970ea3a773603e06349ffa95ead38e17dc0cb # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /Users/jsujanchowdary/.jenkins/workspace/severus-ai/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Jsujanchowdary/severus-ai # timeout=10
+Fetching upstream changes from https://github.com/Jsujanchowdary/severus-ai
+ > git --version # timeout=10
+ > git --version # 'git version 2.50.1 (Apple Git-155)'
+ > git fetch --tags --force --progress -- https://github.com/Jsujanchowdary/severus-ai +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 12c772e3ef1947acf2189d6839bc020d27e201d4 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 12c772e3ef1947acf2189d6839bc020d27e201d4 # timeout=10
+Commit message: "adding monitoring service"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Setup Monitoring Requirements)
+[Pipeline] sh
++ set -euo pipefail
++ echo '📥 Adding Prometheus Helm repository...'
+📥 Adding Prometheus Helm repository...
++ /opt/homebrew/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+"prometheus-community" already exists with the same configuration, skipping
++ /opt/homebrew/bin/helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "prometheus-community" chart repository
+...Successfully got an update from the "grafana" chart repository
+Update Complete. ⎈Happy Helming!⎈
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy Monitoring Stack)
+[Pipeline] sh
++ set -euo pipefail
++ echo '📊 Deploying Prometheus and Grafana stack...'
+📊 Deploying Prometheus and Grafana stack...
++ /opt/homebrew/bin/helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack --namespace default --set grafana.adminPassword=admin123 --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+level=WARN msg="unable to find exact version; falling back to closest available version" chart=kube-prometheus-stack requested="" selected=81.4.1
+Release "kube-prometheus-stack" has been upgraded. Happy Helming!
+NAME: kube-prometheus-stack
+LAST DEPLOYED: Sat Jan 31 02:07:01 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 2
+DESCRIPTION: Upgrade complete
+NOTES:
+kube-prometheus-stack has been installed. Check its status by running:
+  kubectl --namespace default get pods -l "release=kube-prometheus-stack"
+
+Get Grafana 'admin' user password by running:
+
+  kubectl --namespace default get secrets kube-prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
+
+Access Grafana local instance:
+
+  export POD_NAME=$(kubectl --namespace default get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=kube-prometheus-stack" -oname)
+  kubectl --namespace default port-forward $POD_NAME 3000
+
+Get your grafana admin user password by running:
+
+  kubectl get secret --namespace default -l app.kubernetes.io/component=admin-secret -o jsonpath="{.items[0].data.admin-password}" | base64 --decode ; echo
+
+
+Visit https://github.com/prometheus-operator/kube-prometheus for instructions on how to create & configure Alertmanager and Prometheus instances using the Operator.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Configure Application Monitoring)
+[Pipeline] sh
++ set -euo pipefail
++ echo '🔧 Configuring application metrics discovery...'
+🔧 Configuring application metrics discovery...
++ /Applications/Docker.app/Contents/Resources/bin/kubectl label servicemonitor severus-ai release=kube-prometheus-stack --overwrite
+servicemonitor.monitoring.coreos.com/severus-ai not labeled
++ echo '📥 Importing Grafana Dashboard...'
+📥 Importing Grafana Dashboard...
++ sleep 10
++ DASHBOARD_PATH=config/grafana-dashboard-application.json
++ '[' -f config/grafana-dashboard-application.json ']'
++ echo 'Found dashboard file. Importing...'
+Found dashboard file. Importing...
++ curl -u admin:admin123 -X POST -H 'Content-Type: application/json' -d @config/grafana-dashboard-application.json http://kube-prometheus-stack-grafana.default.svc.cluster.local/api/dashboards/db
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0curl: (6) Could not resolve host: kube-prometheus-stack-grafana.default.svc.cluster.local
++ echo '⚠️ Failed to import dashboard via internal URL, trying local port-forward fallback if in local mode'
+⚠️ Failed to import dashboard via internal URL, trying local port-forward fallback if in local mode
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Application Build)
+[Pipeline] sh
++ set -euo pipefail
++ echo '🔧 Installing dependencies (venv)...'
+🔧 Installing dependencies (venv)...
++ /opt/homebrew/bin/python3 -m venv venv
++ . venv/bin/activate
+++ deactivate nondestructive
+++ '[' -n '' ']'
+++ '[' -n '' ']'
+++ hash -r
+++ '[' -n '' ']'
+++ unset VIRTUAL_ENV
+++ unset VIRTUAL_ENV_PROMPT
+++ '[' '!' nondestructive = nondestructive ']'
+++ case "$(uname)" in
++++ uname
+++ export VIRTUAL_ENV=/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv
+++ VIRTUAL_ENV=/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv
+++ _OLD_VIRTUAL_PATH=/Applications/Docker.app/Contents/Resources/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+++ PATH=/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin:/Applications/Docker.app/Contents/Resources/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+++ export PATH
+++ VIRTUAL_ENV_PROMPT=venv
+++ export VIRTUAL_ENV_PROMPT
+++ '[' -n '' ']'
+++ '[' -z '' ']'
+++ _OLD_VIRTUAL_PS1=
+++ PS1='(venv) '
+++ export PS1
+++ hash -r
+++ which python
++ echo 'Python in use: /Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin/python'
+Python in use: /Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin/python
+++ which pip
++ echo 'Pip in use: /Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin/pip'
+Pip in use: /Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin/pip
++ pip install --upgrade pip
+Requirement already satisfied: pip in ./venv/lib/python3.14/site-packages (25.3)
++ pip install -r requirements.txt
+Requirement already satisfied: streamlit in ./venv/lib/python3.14/site-packages (from -r requirements.txt (line 1)) (1.53.1)
+Requirement already satisfied: requests in ./venv/lib/python3.14/site-packages (from -r requirements.txt (line 2)) (2.32.5)
+Requirement already satisfied: python-dotenv in ./venv/lib/python3.14/site-packages (from -r requirements.txt (line 3)) (1.2.1)
+Requirement already satisfied: prometheus-client in ./venv/lib/python3.14/site-packages (from -r requirements.txt (line 4)) (0.24.1)
+Requirement already satisfied: pypdf in ./venv/lib/python3.14/site-packages (from -r requirements.txt (line 5)) (6.6.2)
+Requirement already satisfied: altair!=5.4.0,!=5.4.1,<7,>=4.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (6.0.0)
+Requirement already satisfied: blinker<2,>=1.5.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (1.9.0)
+Requirement already satisfied: cachetools<7,>=5.5 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (6.2.6)
+Requirement already satisfied: click<9,>=7.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (8.3.1)
+Requirement already satisfied: numpy<3,>=1.23 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (2.4.1)
+Requirement already satisfied: packaging>=20 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (26.0)
+Requirement already satisfied: pandas<3,>=1.4.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (2.3.3)
+Requirement already satisfied: pillow<13,>=7.1.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (12.1.0)
+Requirement already satisfied: protobuf<7,>=3.20 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (6.33.4)
+Requirement already satisfied: pyarrow>=7.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (23.0.0)
+Requirement already satisfied: tenacity<10,>=8.1.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (9.1.2)
+Requirement already satisfied: toml<2,>=0.10.1 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (0.10.2)
+Requirement already satisfied: typing-extensions<5,>=4.10.0 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (4.15.0)
+Requirement already satisfied: gitpython!=3.1.19,<4,>=3.0.7 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (3.1.46)
+Requirement already satisfied: pydeck<1,>=0.8.0b4 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (0.9.1)
+Requirement already satisfied: tornado!=6.5.0,<7,>=6.0.3 in ./venv/lib/python3.14/site-packages (from streamlit->-r requirements.txt (line 1)) (6.5.4)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./venv/lib/python3.14/site-packages (from requests->-r requirements.txt (line 2)) (3.4.4)
+Requirement already satisfied: idna<4,>=2.5 in ./venv/lib/python3.14/site-packages (from requests->-r requirements.txt (line 2)) (3.11)
+Requirement already satisfied: urllib3<3,>=1.21.1 in ./venv/lib/python3.14/site-packages (from requests->-r requirements.txt (line 2)) (2.6.3)
+Requirement already satisfied: certifi>=2017.4.17 in ./venv/lib/python3.14/site-packages (from requests->-r requirements.txt (line 2)) (2026.1.4)
+Requirement already satisfied: jinja2 in ./venv/lib/python3.14/site-packages (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (3.1.6)
+Requirement already satisfied: jsonschema>=3.0 in ./venv/lib/python3.14/site-packages (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (4.26.0)
+Requirement already satisfied: narwhals>=1.27.1 in ./venv/lib/python3.14/site-packages (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (2.15.0)
+Requirement already satisfied: gitdb<5,>=4.0.1 in ./venv/lib/python3.14/site-packages (from gitpython!=3.1.19,<4,>=3.0.7->streamlit->-r requirements.txt (line 1)) (4.0.12)
+Requirement already satisfied: smmap<6,>=3.0.1 in ./venv/lib/python3.14/site-packages (from gitdb<5,>=4.0.1->gitpython!=3.1.19,<4,>=3.0.7->streamlit->-r requirements.txt (line 1)) (5.0.2)
+Requirement already satisfied: python-dateutil>=2.8.2 in ./venv/lib/python3.14/site-packages (from pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1)) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in ./venv/lib/python3.14/site-packages (from pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1)) (2025.2)
+Requirement already satisfied: tzdata>=2022.7 in ./venv/lib/python3.14/site-packages (from pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1)) (2025.3)
+Requirement already satisfied: MarkupSafe>=2.0 in ./venv/lib/python3.14/site-packages (from jinja2->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (3.0.3)
+Requirement already satisfied: attrs>=22.2.0 in ./venv/lib/python3.14/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (25.4.0)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in ./venv/lib/python3.14/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (2025.9.1)
+Requirement already satisfied: referencing>=0.28.4 in ./venv/lib/python3.14/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (0.37.0)
+Requirement already satisfied: rpds-py>=0.25.0 in ./venv/lib/python3.14/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1)) (0.30.0)
+Requirement already satisfied: six>=1.5 in ./venv/lib/python3.14/site-packages (from python-dateutil>=2.8.2->pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1)) (1.17.0)
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Run (Smoke Start))
+[Pipeline] sh
++ set -euo pipefail
++ echo '🚀 Starting application for smoke test...'
+🚀 Starting application for smoke test...
++ . venv/bin/activate
+++ deactivate nondestructive
+++ '[' -n '' ']'
+++ '[' -n '' ']'
+++ hash -r
+++ '[' -n '' ']'
+++ unset VIRTUAL_ENV
+++ unset VIRTUAL_ENV_PROMPT
+++ '[' '!' nondestructive = nondestructive ']'
+++ case "$(uname)" in
++++ uname
+++ export VIRTUAL_ENV=/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv
+++ VIRTUAL_ENV=/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv
+++ _OLD_VIRTUAL_PATH=/Applications/Docker.app/Contents/Resources/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+++ PATH=/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin:/Applications/Docker.app/Contents/Resources/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+++ export PATH
+++ VIRTUAL_ENV_PROMPT=venv
+++ export VIRTUAL_ENV_PROMPT
+++ '[' -n '' ']'
+++ '[' -z '' ']'
+++ _OLD_VIRTUAL_PS1=
+++ PS1='(venv) '
+++ export PS1
+++ hash -r
++ '[' -z /Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv ']'
++ which python
+/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin/python
++ which streamlit
+/Users/jsujanchowdary/.jenkins/workspace/severus-ai/venv/bin/streamlit
++ sleep 20
++ nohup streamlit run app.py --server.port=8505 --server.headless=true
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test (Smoke Test))
+[Pipeline] sh
++ set -euo pipefail
++ echo '🧪 Running smoke test...'
+🧪 Running smoke test...
++ echo '---- App logs ----'
+---- App logs ----
++ tail -n 30 app.log
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8505
+  Network URL: http://192.168.1.2:8505
+  External URL: http://122.171.20.181:8505
+
+  For better performance, install the Watchdog module:
+
+  $ xcode-select --install
+  $ pip install watchdog
+            
++ echo ------------------
+------------------
++ curl --retry 5 --retry-delay 2 --fail http://127.0.0.1:8505
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1522  100  1522    0     0   385k      0 --:--:-- --:--:-- --:--:--  495k
+<!--
+ Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2026)
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="shortcut icon" href="./favicon.png" />
+    <link
+      rel="preload"
+      href="./static/media/SourceSansVF-Upright.ttf.BsWL4Kly.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <title>Streamlit</title>
+
+    <!-- initialize window.prerenderReady to false and then set to true in React app when app is ready for indexing -->
+    <script>
+      window.prerenderReady = false
+    </script>
+    <script type="module" crossorigin src="./static/js/index.DSTThs-t.js"></script>
+    <link rel="stylesheet" crossorigin href="./static/css/index.BUP6fTcR.css">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
++ echo '✅ Smoke test passed'
+✅ Smoke test passed
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Login)
+[Pipeline] withCredentials
+Masking supported pattern matches of $DOCKER_PASS
+[Pipeline] {
+[Pipeline] sh
++ echo '🔐 Logging into Docker Hub...'
+🔐 Logging into Docker Hub...
++ echo ****
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux login -u sujanchow --password-stdin
+Login Succeeded
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Build Image)
+[Pipeline] sh
++ set -euo pipefail
++ echo '🐳 Building Docker image...'
+🐳 Building Docker image...
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux build -t sujanchow/serverus-ai:v1 .
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from dockerfile
+#1 transferring dockerfile: 400B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 ...
+
+#3 [auth] library/python:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 2.5s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/7] FROM docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 1.40MB 0.8s done
+#6 DONE 0.9s
+
+#7 [4/7] COPY requirements.txt .
+#7 CACHED
+
+#8 [2/7] WORKDIR /app
+#8 CACHED
+
+#9 [3/7] RUN apt-get update && apt-get install -y     curl     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [5/7] RUN pip install --no-cache-dir -r requirements.txt
+#10 CACHED
+
+#11 [6/7] COPY . .
+#11 DONE 2.0s
+
+#12 [7/7] RUN chmod +x start.sh
+#12 DONE 0.1s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 0.7s done
+#13 writing image sha256:d171f6f5c2405eab90718b16acc53533a00bd8c3784fc14d0bf0d53639e1ad4d
+#13 writing image sha256:d171f6f5c2405eab90718b16acc53533a00bd8c3784fc14d0bf0d53639e1ad4d done
+#13 naming to docker.io/sujanchow/serverus-ai:v1 done
+#13 DONE 0.7s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/o7o5lvlfk2kb29sstzhtt225c
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Trivy Security Scan)
+[Pipeline] sh
++ set -euo pipefail
++ echo '🔐 Running Trivy scan...'
+🔐 Running Trivy scan...
+++ ls /Users/jsujanchowdary/.docker/run/docker.sock
++ DOCKER_SOCK=/Users/jsujanchowdary/.docker/run/docker.sock
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux run --rm -v /Users/jsujanchowdary/.docker/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity CRITICAL,HIGH --exit-code 0 sujanchow/serverus-ai:v1
++ tee trivy-report.txt
+2026-01-30T20:38:10Z	INFO	[vulndb] Need to update DB
+2026-01-30T20:38:10Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-01-30T20:38:10Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+1.94 MiB / 83.75 MiB [->_____________________________________________________________] 2.31% ? p/s ?7.98 MiB / 83.75 MiB [------>________________________________________________________] 9.53% ? p/s ?16.45 MiB / 83.75 MiB [----------->_________________________________________________] 19.65% ? p/s ?23.16 MiB / 83.75 MiB [------------->__________________________________] 27.65% 35.37 MiB p/s ETA 1s31.43 MiB / 83.75 MiB [------------------>_____________________________] 37.52% 35.37 MiB p/s ETA 1s37.98 MiB / 83.75 MiB [--------------------->__________________________] 45.34% 35.37 MiB p/s ETA 1s42.82 MiB / 83.75 MiB [------------------------>_______________________] 51.13% 35.21 MiB p/s ETA 1s47.40 MiB / 83.75 MiB [--------------------------->____________________] 56.59% 35.21 MiB p/s ETA 1s51.35 MiB / 83.75 MiB [----------------------------->__________________] 61.31% 35.21 MiB p/s ETA 0s55.71 MiB / 83.75 MiB [------------------------------->________________] 66.52% 34.32 MiB p/s ETA 0s60.02 MiB / 83.75 MiB [---------------------------------->_____________] 71.67% 34.32 MiB p/s ETA 0s64.39 MiB / 83.75 MiB [------------------------------------>___________] 76.89% 34.32 MiB p/s ETA 0s68.69 MiB / 83.75 MiB [--------------------------------------->________] 82.02% 33.50 MiB p/s ETA 0s73.09 MiB / 83.75 MiB [----------------------------------------->______] 87.28% 33.50 MiB p/s ETA 0s76.87 MiB / 83.75 MiB [-------------------------------------------->___] 91.79% 33.50 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.96 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.96 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 32.96 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.84 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.84 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 30.84 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.85 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.85 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 28.85 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [---------------------------------------------->] 100.00% 26.99 MiB p/s ETA 0s83.75 MiB / 83.75 MiB [-------------------------------------------------] 100.00% 17.25 MiB p/s 5.1s2026-01-30T20:38:16Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-01-30T20:38:16Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-01-30T20:38:16Z	INFO	[secret] Secret scanning is enabled
+2026-01-30T20:38:16Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-01-30T20:38:16Z	INFO	[secret] Please see https://trivy.dev/docs/v0.68/guide/scanner/secret#recommendation for faster secret detection
+2026-01-30T20:38:27Z	INFO	[python] Licenses acquired from one or more METADATA files may be subject to additional terms. Use `--debug` flag to see all affected packages.
+2026-01-30T20:38:27Z	WARN	Third-party SBOM may lead to inaccurate vulnerability detection
+2026-01-30T20:38:27Z	WARN	Recommend using Trivy to generate SBOMs
+2026-01-30T20:38:27Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="usr/local/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
+2026-01-30T20:38:29Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/lib/python3.14/site-packages/pydeck/nbextension/static/index.js.map" size (MB)=11
+2026-01-30T20:38:30Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
+2026-01-30T20:38:31Z	INFO	Detected OS	family="debian" version="13.3"
+2026-01-30T20:38:31Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=115
+2026-01-30T20:38:31Z	INFO	Number of language-specific files	num=1
+2026-01-30T20:38:31Z	INFO	[python-pkg] Detecting vulnerabilities...
+2026-01-30T20:38:31Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.68/guide/scanner/vulnerability#severity-selection for details.
+2026-01-30T20:38:31Z	INFO	Table result includes only package filenames. Use '--format json' option to get the full path to the package file.
+
+Report Summary
+
+┌──────────────────────────────────────────────────────────────────────────────────┬────────────┬─────────────────┬─────────┐
+│                                      Target                                      │    Type    │ Vulnerabilities │ Secrets │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ sujanchow/serverus-ai:v1 (debian 13.3)                                           │   debian   │        8        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ Python                                                                           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/altair-6.0.0.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/attrs-25.4.0.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/blinker-1.9.0.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/cachetools-6.2.6.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/certifi-2026.1.4.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/charset_normalizer-3.4.4.dist-info/METADA- │ python-pkg │        0        │    -    │
+│ TA                                                                               │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/click-8.3.1.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/gitdb-4.0.12.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/gitpython-3.1.46.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/idna-3.11.dist-info/METADATA               │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/jinja2-3.1.6.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/jsonschema-4.26.0.dist-info/METADATA       │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/jsonschema_specifications-2025.9.1.dist-i- │ python-pkg │        0        │    -    │
+│ nfo/METADATA                                                                     │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/markupsafe-3.0.3.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/narwhals-2.15.0.dist-info/METADATA         │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/numpy-2.4.1.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/packaging-26.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pandas-2.3.3.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pillow-12.1.0.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pip-25.3.dist-info/METADATA                │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/prometheus_client-0.24.1.dist-info/METADA- │ python-pkg │        0        │    -    │
+│ TA                                                                               │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/protobuf-6.33.4.dist-info/METADATA         │ python-pkg │        1        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pyarrow-23.0.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pydeck-0.9.1.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pypdf-6.6.2.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/python_dateutil-2.9.0.post0.dist-info/MET- │ python-pkg │        0        │    -    │
+│ ADATA                                                                            │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/python_dotenv-1.2.1.dist-info/METADATA     │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pytz-2025.2.dist-info/METADATA             �
+📣 [34mNotices:[0m
+  - Version 0.69.0 of Trivy is now available, current version is 0.68.2
+
+To suppress version checks, run Trivy scans with the --skip-version-check flag
+
+� python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/referencing-0.37.0.dist-info/METADATA      │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/requests-2.32.5.dist-info/METADATA         │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/rpds_py-0.30.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/six-1.17.0.dist-info/METADATA              │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/smmap-5.0.2.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/streamlit-1.53.1.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/tenacity-9.1.2.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/toml-0.10.2.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/tornado-6.5.4.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/typing_extensions-4.15.0.dist-info/METADA- │ python-pkg │        0        │    -    │
+│ TA                                                                               │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/tzdata-2025.3.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/urllib3-2.6.3.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/altair-6.0.0.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/attrs-25.4.0.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/blinker-1.9.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/cachetools-6.2.6.dist-info/METADATA       │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/certifi-2026.1.4.dist-info/METADATA       │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/charset_normalizer-3.4.4.dist-info/METAD- │ python-pkg │        0        │    -    │
+│ ATA                                                                              │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/click-8.3.1.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/gitdb-4.0.12.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/gitpython-3.1.46.dist-info/METADATA       │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/idna-3.11.dist-info/METADATA              │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/jinja2-3.1.6.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/jsonschema-4.26.0.dist-info/METADATA      │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/jsonschema_specifications-2025.9.1.dist-- │ python-pkg │        0        │    -    │
+│ info/METADATA                                                                    │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/markupsafe-3.0.3.dist-info/METADATA       │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/narwhals-2.15.0.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/numpy-2.4.1.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/packaging-26.0.dist-info/METADATA         │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/pandas-2.3.3.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/pillow-12.1.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/pip-24.0.dist-info/METADATA               │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/prometheus_client-0.24.1.dist-info/METAD- │ python-pkg │        0        │    -    │
+│ ATA                                                                              │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/protobuf-6.33.5.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/pyarrow-23.0.0.dist-info/METADATA         │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/pydeck-0.9.1.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/pypdf-6.6.2.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/python_dateutil-2.9.0.post0.dist-info/ME- │ python-pkg │        0        │    -    │
+│ TADATA                                                                           │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/python_dotenv-1.2.1.dist-info/METADATA    │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/pytz-2025.2.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/referencing-0.37.0.dist-info/METADATA     │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/requests-2.32.5.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/rpds_py-0.30.0.dist-info/METADATA         │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools-79.0.1.dist-info/METADATA      │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/autocommand-2.2.2.dis- │ python-pkg │        0        │    -    │
+│ t-info/METADATA                                                                  │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/backports.tarfile-1.2- │ python-pkg │        0        │    -    │
+│ .0.dist-info/METADATA                                                            │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/importlib_metadata-8.- │ python-pkg │        0        │    -    │
+│ 0.0.dist-info/METADATA                                                           │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/inflect-7.3.1.dist-in- │ python-pkg │        0        │    -    │
+│ fo/METADATA                                                                      │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/jaraco.collections-5.- │ python-pkg │        0        │    -    │
+│ 1.0.dist-info/METADATA                                                           │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/jaraco.context-5.3.0.- │ python-pkg │        1        │    -    │
+│ dist-info/METADATA                                                               │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/jaraco.functools-4.0.- │ python-pkg │        0        │    -    │
+│ 1.dist-info/METADATA                                                             │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/jaraco.text-3.12.1.di- │ python-pkg │        0        │    -    │
+│ st-info/METADATA                                                                 │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/more_itertools-10.3.0- │ python-pkg │        0        │    -    │
+│ .dist-info/METADATA                                                              │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/packaging-24.2.dist-i- │ python-pkg │        0        │    -    │
+│ nfo/METADATA                                                                     │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/platformdirs-4.2.2.di- │ python-pkg │        0        │    -    │
+│ st-info/METADATA                                                                 │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/tomli-2.0.1.dist-info- │ python-pkg │        0        │    -    │
+│ /METADATA                                                                        │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/typeguard-4.3.0.dist-- │ python-pkg │        0        │    -    │
+│ info/METADATA                                                                    │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/typing_extensions-4.1- │ python-pkg │        0        │    -    │
+│ 2.2.dist-info/METADATA                                                           │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/wheel-0.45.1.dist-inf- │ python-pkg │        1        │    -    │
+│ o/METADATA                                                                       │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/setuptools/_vendor/zipp-3.19.2.dist-info- │ python-pkg │        0        │    -    │
+│ /METADATA                                                                        │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/six-1.17.0.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/smmap-5.0.2.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/streamlit-1.53.1.dist-info/METADATA       │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/tenacity-9.1.2.dist-info/METADATA         │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/toml-0.10.2.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/tornado-6.5.4.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/typing_extensions-4.15.0.dist-info/METAD- │ python-pkg │        0        │    -    │
+│ ATA                                                                              │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/tzdata-2025.3.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/urllib3-2.6.3.dist-info/METADATA          │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/watchdog-6.0.0.dist-info/METADATA         │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ usr/local/lib/python3.11/site-packages/wheel-0.45.1.dist-info/METADATA           │ python-pkg │        1        │    -    │
+└──────────────────────────────────────────────────────────────────────────────────┴────────────┴─────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+sujanchow/serverus-ai:v1 (debian 13.3)
+======================================
+Total: 8 (HIGH: 5, CRITICAL: 3)
+
+┌─────────────────────────┬────────────────┬──────────┬──────────┬───────────────────┬─────────────────┬──────────────────────────────────────────────────────────────┐
+│         Library         │ Vulnerability  │ Severity │  Status  │ Installed Version │  Fixed Version  │                            Title                             │
+├─────────────────────────┼────────────────┼──────────┼──────────┼───────────────────┼─────────────────┼──────────────────────────────────────────────────────────────┤
+│ libc-bin                │ CVE-2026-0861  │ HIGH     │ affected │ 2.41-12+deb13u1   │                 │ glibc: Integer overflow in memalign leads to heap corruption │
+│                         │                │          │          │                   │                 │ https://avd.aquasec.com/nvd/cve-2026-0861                    │
+├─────────────────────────┤                │          │          │                   ├─────────────────┤                                                              │
+│ libc6                   │                │          │          │                   │                 │                                                              │
+│                         │                │          │          │                   │                 │                                                              │
+├─────────────────────────┼────────────────┼──────────┼──────────┼───────────────────┼─────────────────┼──────────────────────────────────────────────────────────────┤
+│ libssl3t64              │ CVE-2025-15467 │ CRITICAL │ fixed    │ 3.5.4-1~deb13u1   │ 3.5.4-1~deb13u2 │ openssl: OpenSSL: Remote code execution or Denial of Service │
+│                         │                │          │          │                   │                 │ via oversized Initialization...                              │
+│                         │                │          │          │                   │                 │ https://avd.aquasec.com/nvd/cve-2025-15467                   │
+│                         ├────────────────┼──────────┤          │                   │                 ├──────────────────────────────────────────────────────────────┤
+│                         │ CVE-2025-69419 │ HIGH     │          │                   │                 │ openssl: OpenSSL: Arbitrary code execution due to            │
+│                         │                │          │          │                   │                 │ out-of-bounds write in PKCS#12 processing...                 │
+│                         │                │          │          │                   │                 │ https://avd.aquasec.com/nvd/cve-2025-69419                   │
+├─────────────────────────┼────────────────┼──────────┤          │                   │                 ├──────────────────────────────────────────────────────────────┤
+│ openssl                 │ CVE-2025-15467 │ CRITICAL │          │                   │                 │ openssl: OpenSSL: Remote code execution or Denial of Service │
+│                         │                │          │          │                   │                 │ via oversized Initialization...                              │
+│                         │                │          │          │                   │                 │ https://avd.aquasec.com/nvd/cve-2025-15467                   │
+│                         ├────────────────┼──────────┤          │                   │                 ├──────────────────────────────────────────────────────────────┤
+│                         │ CVE-2025-69419 │ HIGH     │          │                   │                 │ openssl: OpenSSL: Arbitrary code execution due to            │
+│                         │                │          │          │                   │                 │ out-of-bounds write in PKCS#12 processing...                 │
+│                         │                │          │          │                   │                 │ https://avd.aquasec.com/nvd/cve-2025-69419                   │
+├─────────────────────────┼────────────────┼──────────┤          │                   │                 ├──────────────────────────────────────────────────────────────┤
+│ openssl-provider-legacy │ CVE-2025-15467 │ CRITICAL │          │                   │                 │ openssl: OpenSSL: Remote code execution or Denial of Service │
+│                         │                │          │          │                   │                 │ via oversized Initialization...                              │
+│                         │                │          │          │                   │                 │ https://avd.aquasec.com/nvd/cve-2025-15467                   │
+│                         ├────────────────┼──────────┤          │                   │                 ├──────────────────────────────────────────────────────────────┤
+│                         │ CVE-2025-69419 │ HIGH     │          │                   │                 │ openssl: OpenSSL: Arbitrary code execution due to            │
+│                         │                │          │          │                   │                 │ out-of-bounds write in PKCS#12 processing...                 │
+│                         │                │          │          │                   │                 │ https://avd.aquasec.com/nvd/cve-2025-69419                   │
+└─────────────────────────┴────────────────┴──────────┴──────────┴───────────────────┴─────────────────┴──────────────────────────────────────────────────────────────┘
+
+Python (python-pkg)
+===================
+Total: 4 (HIGH: 4, CRITICAL: 0)
+
+┌───────────────────────────┬────────────────┬──────────┬──────────┬───────────────────┬───────────────┬──────────────────────────────────────────────────────────────┐
+│          Library          │ Vulnerability  │ Severity │  Status  │ Installed Version │ Fixed Version │                            Title                             │
+├───────────────────────────┼────────────────┼──────────┼──────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ jaraco.context (METADATA) │ CVE-2026-23949 │ HIGH     │ fixed    │ 5.3.0             │ 6.1.0         │ jaraco.context: jaraco.context: Path traversal via malicious │
+│                           │                │          │          │                   │               │ tar archives                                                 │
+│                           │                │          │          │                   │               │ https://avd.aquasec.com/nvd/cve-2026-23949                   │
+├───────────────────────────┼────────────────┤          ├──────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ protobuf (METADATA)       │ CVE-2026-0994  │          │ affected │ 6.33.4            │               │ python: protobuf: Protobuf: Denial of Service due to         │
+│                           │                │          │          │                   │               │ recursion depth bypass                                       │
+│                           │                │          │          │                   │               │ https://avd.aquasec.com/nvd/cve-2026-0994                    │
+├───────────────────────────┼────────────────┤          ├──────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ wheel (METADATA)          │ CVE-2026-24049 │          │ fixed    │ 0.45.1            │ 0.46.2        │ wheel: wheel: Privilege Escalation or Arbitrary Code         │
+│                           │                │          │          │                   │               │ Execution via malicious wheel file...                        │
+│                           │                │          │          │                   │               │ https://avd.aquasec.com/nvd/cve-2026-24049                   │
+│                           │                │          │          │                   │               │                                                              │
+│                           │                │          │          │                   │               │                                                              │
+│                           │                │          │          │                   │               │                                                              │
+│                           │                │          │          │                   │               │                                                              │
+└───────────────────────────┴────────────────┴──────────┴──────────┴───────────────────┴───────────────┴──────────────────────────────────────────────────────────────┘
+Post stage
+[Pipeline] archiveArtifacts
+Archiving artifacts
+Recording fingerprints
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Push Image)
+[Pipeline] sh
++ set -e
++ echo '📦 Pushing Docker image (with retry)...'
+📦 Pushing Docker image (with retry)...
++ for i in 1 2 3
++ echo '👉 Push attempt 1...'
+👉 Push attempt 1...
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/serverus-ai:v1
+The push refers to repository [docker.io/sujanchow/serverus-ai]
+64158960d4ec: Preparing
+3eff9f2d0b57: Preparing
+e20a16f530a4: Preparing
+17c99f5d622a: Preparing
+d79850edf659: Preparing
+9d94a520dea6: Preparing
+14560f658b88: Preparing
+76c58cdecda3: Preparing
+188b50d8162b: Preparing
+37127a0fa4c7: Preparing
+14560f658b88: Waiting
+76c58cdecda3: Waiting
+188b50d8162b: Waiting
+37127a0fa4c7: Waiting
+9d94a520dea6: Waiting
+d79850edf659: Layer already exists
+e20a16f530a4: Layer already exists
+17c99f5d622a: Layer already exists
+9d94a520dea6: Layer already exists
+76c58cdecda3: Layer already exists
+37127a0fa4c7: Layer already exists
+188b50d8162b: Layer already exists
+14560f658b88: Layer already exists
+64158960d4ec: Pushed
+3eff9f2d0b57: Pushed
+v1: digest: sha256:881b249ae2e6d3918f0ac1bc29512399f040368feaa9b8e6e3fb5cab7cfcda8e size: 2416
++ echo '✅ Docker push succeeded'
+✅ Docker push succeeded
++ exit 0
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build Stress Pod Image)
+[Pipeline] sh
++ set -euo pipefail
++ echo '🔨 Building stress-pod Docker image...'
+🔨 Building stress-pod Docker image...
++ cd stress-pod
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux build -t sujanchow/stress-pod:v1 -t sujanchow/stress-pod:latest .
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 461B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 ...
+
+#3 [auth] library/ubuntu:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 DONE 2.5s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/5] FROM docker.io/library/ubuntu:22.04@sha256:c7eb020043d8fc2ae0793fb35a37bff1cf33f156d4d4b12ccc7f3ef8706c38b1
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 35B done
+#6 DONE 0.0s
+
+#7 [2/5] RUN apt-get update &&     apt-get install -y curl bash ca-certificates &&     curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl &&     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl &&     rm -rf /var/lib/apt/lists/* kubectl
+#7 CACHED
+
+#8 [3/5] WORKDIR /stress
+#8 CACHED
+
+#9 [4/5] COPY stress_pod.sh .
+#9 CACHED
+
+#10 [5/5] RUN chmod +x stress_pod.sh
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 writing image sha256:32bf063663372f52de3748da7d1454a07a1296b75571ea9c79523fe9536f453f done
+#11 naming to docker.io/sujanchow/stress-pod:v1 done
+#11 naming to docker.io/sujanchow/stress-pod:latest done
+#11 DONE 0.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/zv4so0aqz4l4io46wrmqak58w
++ echo '✅ Stress-pod image built successfully'
+✅ Stress-pod image built successfully
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push Stress Pod Image)
+[Pipeline] sh
++ set -euo pipefail
++ echo '📤 Pushing stress-pod image to registry...'
+📤 Pushing stress-pod image to registry...
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/stress-pod:v1
+The push refers to repository [docker.io/sujanchow/stress-pod]
+9cd07d0f298e: Preparing
+6d592cbf40d6: Preparing
+0fb6459bab15: Preparing
+d9e0617b46d5: Preparing
+168d3f8561df: Preparing
+168d3f8561df: Layer already exists
+9cd07d0f298e: Layer already exists
+0fb6459bab15: Layer already exists
+6d592cbf40d6: Layer already exists
+d9e0617b46d5: Layer already exists
+v1: digest: sha256:996300b783c776109535ad40c99fcd4a9cd779cd90009beb1c20811e8168e8d9 size: 1363
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/stress-pod:latest
+The push refers to repository [docker.io/sujanchow/stress-pod]
+9cd07d0f298e: Preparing
+6d592cbf40d6: Preparing
+0fb6459bab15: Preparing
+d9e0617b46d5: Preparing
+168d3f8561df: Preparing
+9cd07d0f298e: Layer already exists
+6d592cbf40d6: Layer already exists
+d9e0617b46d5: Layer already exists
+0fb6459bab15: Layer already exists
+168d3f8561df: Layer already exists
+latest: digest: sha256:996300b783c776109535ad40c99fcd4a9cd779cd90009beb1c20811e8168e8d9 size: 1363
++ echo '✅ Stress-pod image pushed successfully'
+✅ Stress-pod image pushed successfully
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy to Kubernetes (Ingress via Helm))
+[Pipeline] sh
++ set -euo pipefail
++ echo '☸️ Deploying Severus AI...'
+☸️ Deploying Severus AI...
++ /Applications/Docker.app/Contents/Resources/bin/kubectl delete job stress-pod --ignore-not-found=true
+job.batch "stress-pod" deleted from default namespace
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --set image.repository=sujanchow/serverus-ai --set image.tag=v1
+I0131 02:09:19.895695   77087 warnings.go:110] "Warning: spec.template.spec.containers[1].ports[0]: duplicate port definition with spec.template.spec.containers[0].ports[1]"
+I0131 02:09:19.895737   77087 warnings.go:110] "Warning: spec.template.spec.containers[1].ports[0]: duplicate port name \"metrics\" with spec.template.spec.containers[0].ports[1], services and probes that select ports by name will use spec.template.spec.containers[0].ports[1]"
+Release "severus-ai" has been upgraded. Happy Helming!
+NAME: severus-ai
+LAST DEPLOYED: Sat Jan 31 02:09:19 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 53
+DESCRIPTION: Upgrade complete
+TEST SUITE: None
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Post-Deployment Tests)
+[Pipeline] parallel
+[Pipeline] { (Branch: Ingress Reachability Test)
+[Pipeline] { (Branch: Ollama Connectivity Test)
+[Pipeline] { (Branch: Kubernetes Health Test)
+[Pipeline] { (Branch: Log Sanity Test)
+[Pipeline] { (Branch: K3s Version Validation)
+[Pipeline] stage
+[Pipeline] { (Ingress Reachability Test)
+[Pipeline] stage
+[Pipeline] { (Ollama Connectivity Test)
+[Pipeline] stage
+[Pipeline] { (Kubernetes Health Test)
+[Pipeline] stage
+[Pipeline] { (Log Sanity Test)
+[Pipeline] stage
+[Pipeline] { (K3s Version Validation)
+[Pipeline] sh
+[Pipeline] sh
+[Pipeline] sh
+[Pipeline] sh
+[Pipeline] sh
++ set -euo pipefail
++ echo '🌐 Testing Ingress reachability via Traefik (port 8081)...'
+🌐 Testing Ingress reachability via Traefik (port 8081)...
++ sleep 6
++ kubectl -n kube-system port-forward svc/traefik 8081:80
++ set +e
++ echo '🧠 Testing Ollama connectivity (NON-BLOCKING)'
+🧠 Testing Ollama connectivity (NON-BLOCKING)
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai --field-selector=status.phase=Running -o 'jsonpath={.items[0].metadata.name}'
++ POD=severus-ai-6698c4c755-w5fs4
++ '[' -z severus-ai-6698c4c755-w5fs4 ']'
++ echo 'Using pod: severus-ai-6698c4c755-w5fs4'
+Using pod: severus-ai-6698c4c755-w5fs4
++ /Applications/Docker.app/Contents/Resources/bin/kubectl exec severus-ai-6698c4c755-w5fs4 -- curl -s --max-time 5 http://host.docker.internal:11434/api/tags
+Defaulted container "severus-ai" out of: severus-ai, metrics-exporter
++ echo '🩺 Checking Kubernetes health...'
+🩺 Checking Kubernetes health...
++ /Applications/Docker.app/Contents/Resources/bin/kubectl rollout status deployment/severus-ai --timeout=120s
+deployment "severus-ai" successfully rolled out
++ /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai
+NAME                          READY   STATUS        RESTARTS   AGE
+severus-ai-6698c4c755-w5fs4   2/2     Running       0          2s
+severus-ai-6cf5d769c9-l882c   2/2     Terminating   0          22m
++ echo '📜 Checking logs...'
+📜 Checking logs...
++ /Applications/Docker.app/Contents/Resources/bin/kubectl logs deployment/severus-ai
++ tail -n 50
+Found 2 pods, using pod/severus-ai-6cf5d769c9-l882c
+Defaulted container "severus-ai" out of: severus-ai, metrics-exporter
+🚀 Starting Severus AI with metrics...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://0.0.0.0:8501
+
+[2026-01-30 20:21:04,669] [INFO] auth - User signed up: testuser
+[2026-01-30 20:21:20,097] [INFO] auth - User logged in: testuser
+[2026-01-30 20:21:27,315] [INFO] chat - Chat created: 1 for testuser
+  Stopping...
+[Pipeline] }
++ mkdir -p k3s-validation-logs
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.26
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] }
+{"models":[{"name":"gemma3:1b","model":"gemma3:1b","modified_at":"2026-01-20T20:43:28.370933516+05:30","size":815319791,"digest":"8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc","details":{"parent_model":"","format":"gguf","family":"gemma3","families":["gemma3"],"parameter_size":"999.89M","quantization_level":"Q4_K_M"}},{"name":"llama3:latest","model":"llama3:latest","modified_at":"2024-09-11T09:02:22.520828542+05:30","size":4661224676,"digest":"365c0bd3c000a25d28ddbf732fe1c6add414de7275464c4e4d1c3b5fcb5d8ad1","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}},{"name":"llama3.1:latest","model":"llama3.1:latest","modified_at":"2024-09-11T08:41:16.857717856+05:30","size":4661230766,"digest":"42182419e9508c30c4b1fe55015f06b65f4ca4b9e28a744be55008d21998a093","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}}]}+ echo '✅ Ollama reachable'
+✅ Ollama reachable
++ exit 0
+[Pipeline] }
+[Pipeline] // stage
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.27
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+[Pipeline] }
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.28
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.29
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.30
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.31
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.32
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.33
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.34
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.35
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+level=DEBUG msg="dry run for release" name=severus-ai
+Post stage
+[Pipeline] archiveArtifacts
+Archiving artifacts
+Recording fingerprints
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
++ curl --retry 5 --retry-delay 2 --fail -H 'Host: severus-ai.local' http://127.0.0.1:8081
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 503
+Warning: Problem : HTTP error. Will retry in 2 seconds. 5 retries left.
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 503
+Warning: Problem : HTTP error. Will retry in 2 seconds. 4 retries left.
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 503
+Warning: Problem : HTTP error. Will retry in 2 seconds. 3 retries left.
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 503
+Warning: Problem : HTTP error. Will retry in 2 seconds. 2 retries left.
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 503
+Warning: Problem : HTTP error. Will retry in 2 seconds. 1 retries left.
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0    20    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 503
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+Failed in branch Ingress Reachability Test
+[Pipeline] // parallel
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Stress Test)
+Stage "Stress Test" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+ERROR: script returned exit code 22
+Finished: FAILURE

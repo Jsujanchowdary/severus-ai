@@ -59,26 +59,32 @@ pipeline {
                     echo "🔧 Configuring application metrics discovery..."
                     
                     # Ensure ServiceMonitor is correctly labeled for Prometheus discovery
-                    # Using --overwrite to ensure the label is applied even if it's there
-                    $KUBECTL_BIN label servicemonitor severus-ai release=kube-prometheus-stack --overwrite || echo "⚠️ ServiceMonitor not found yet, will be applied during deployment"
+                    $KUBECTL_BIN label servicemonitor severus-ai release=kube-prometheus-stack --overwrite || echo "⚠️ ServiceMonitor not found yet"
 
                     echo "📥 Importing Grafana Dashboard..."
-                    # Wait for Grafana to be ready
-                    sleep 10
                     
-                    # Import dashboard via API using curl (more reliable in Jenkins)
-                    # We wrap the JSON in the format Grafana expects
+                    # Start port-forward in background for Jenkins to access Grafana API
+                    # Using port 3001 to avoid potential conflicts
+                    $KUBECTL_BIN port-forward svc/kube-prometheus-stack-grafana 3001:80 >/tmp/grafana-pf.log 2>&1 &
+                    PF_PID=$!
+                    
+                    # Give it a moment to stabilize
+                    sleep 8
+                    
                     DASHBOARD_PATH="config/grafana-dashboard-application.json"
-                    
                     if [ -f "$DASHBOARD_PATH" ]; then
-                        echo "Found dashboard file. Importing..."
-                        curl -u admin:admin123 -X POST \
+                        echo "Found dashboard file. Importing via port-forward (http://127.0.0.1:3001)..."
+                        curl --fail --retry 5 --retry-delay 2 \
+                            -u admin:admin123 -X POST \
                             -H "Content-Type: application/json" \
                             -d @$DASHBOARD_PATH \
-                            http://kube-prometheus-stack-grafana.default.svc.cluster.local/api/dashboards/db || echo "⚠️ Failed to import dashboard via internal URL, trying local port-forward fallback if in local mode"
+                            http://127.0.0.1:3001/api/dashboards/db || echo "⚠️ Failed to import dashboard"
                     else
                         echo "❌ Dashboard file not found at $DASHBOARD_PATH"
                     fi
+                    
+                    # Cleanup PF
+                    kill $PF_PID || true
                 '''
             }
         }
@@ -282,6 +288,9 @@ pipeline {
                     $HELM_BIN upgrade --install severus-ai helm/severus-ai \
                       --set image.repository=${IMAGE_NAME} \
                       --set image.tag=${IMAGE_TAG}
+
+                    echo "⏳ Waiting for rollout to complete (Ensuring No 503 during tests)..."
+                    $KUBECTL_BIN rollout status deployment/severus-ai --timeout=120s
                 '''
             }
         }
@@ -342,7 +351,7 @@ pipeline {
                     steps {
                         sh '''
                             echo "🩺 Checking Kubernetes health..."
-                            $KUBECTL_BIN rollout status deployment/severus-ai --timeout=120s
+                            # Rollout sync already done in deployment stage sequentially
                             $KUBECTL_BIN get pods -l app=severus-ai
                         '''
                     }
