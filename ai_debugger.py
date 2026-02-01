@@ -145,9 +145,9 @@ class GeminiAnalyzer:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        # Using gemini-1.5-flash for better rate limits on free tier
+        # Using gemini-pro (compatible with deprecated google.generativeai package)
         self.model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash-latest',  # Correct model identifier
+            model_name='gemini-pro',  # Stable model for v1beta API
             generation_config={
                 'temperature': 0.2,
                 'top_p': 0.95,
