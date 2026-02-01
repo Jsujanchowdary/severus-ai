@@ -161,6 +161,30 @@ All pipeline stages completed successfully. No issues detected.
 **Conclusion:** No action required. System is healthy.
 """
 
+    def find_error_in_codebase(self, log_content: str, codebase_context: str) -> str:
+        """
+        Extract error keywords from logs and search codebase for exact locations.
+        Returns a formatted string with findings.
+        """
+        import re
+        
+        findings = []
+        
+        # Extract "command not found" errors
+        cmd_not_found = re.findall(r'(\w+): command not found', log_content)
+        
+        for cmd in cmd_not_found:
+            # Search codebase for this command
+            for line in codebase_context.split('\n'):
+                if f'FILE: ' in line:
+                    current_file = line.replace('FILE: ', '').strip()
+                elif cmd in line and '=' not in line:  # Found the command
+                    findings.append(f"Found '{cmd}' in {current_file}")
+        
+        if findings:
+            return "\n=== AUTOMATED ERROR LOCATION FINDINGS ===\n" + "\n".join(findings) + "\n\n"
+        return ""
+
     def analyze_failure(self, codebase_context: str, log_content: str) -> str:
         """
         Send codebase and logs to Ollama for root cause analysis.
