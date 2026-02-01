@@ -158,7 +158,7 @@ class GeminiAnalyzer:
             # New google-genai package
             try:
                 self.client = genai.Client(api_key=api_key)
-                self.model_name = 'gemini-1.5-flash'
+                self.model_name = 'gemini-2.0-flash' # Explicitly listed in available models
             except Exception as e:
                 print(f"⚠️ Error initializing new GenAI client: {e}")
                 NEW_API = False
@@ -167,7 +167,7 @@ class GeminiAnalyzer:
             # Old deprecated package
             genai.configure(api_key=api_key)
             self.model = genai.GenerativeModel(
-                model_name='gemini-1.5-flash', # Slug usually works here
+                model_name='gemini-2.0-flash', # Explicitly listed in available models
                 generation_config={
                     'temperature': 0.2,
                     'top_p': 0.95,
