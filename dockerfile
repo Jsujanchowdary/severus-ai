@@ -2,6 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Ensure logs are not buffered and appear immediately
+ENV PYTHONUNBUFFERED=1
+ENV STREAMLIT_SERVER_HEADLESS=true
+ENV STREAMLIT_LOGGER_LEVEL=info
+
 # System dependencies
 RUN apt-get update && apt-get install -y \
     curl \
