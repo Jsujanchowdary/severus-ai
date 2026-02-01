@@ -151,6 +151,7 @@ class GeminiAnalyzer:
     """Handles interaction with Google Gemini API for root cause analysis."""
     
     def __init__(self, api_key: str):
+        global NEW_API
         self.api_key = api_key
         
         if NEW_API:
@@ -160,7 +161,6 @@ class GeminiAnalyzer:
                 self.model_name = 'gemini-1.5-flash'
             except Exception as e:
                 print(f"⚠️ Error initializing new GenAI client: {e}")
-                global NEW_API
                 NEW_API = False
         
         if not NEW_API:
