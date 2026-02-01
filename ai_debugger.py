@@ -156,12 +156,12 @@ class GeminiAnalyzer:
         if NEW_API:
             # New google-genai package
             self.client = genai.Client(api_key=api_key)
-            self.model_name = 'gemini-2.0-flash-exp'
+            self.model_name = 'gemini-1.5-flash'  # Use stable flash model
         else:
             # Old deprecated package
             genai.configure(api_key=api_key)
             self.model = genai.GenerativeModel(
-                model_name='models/gemini-1.5-pro',  # Full path for old API
+                model_name='gemini-1.5-flash',  # Stable model slug
                 generation_config={
                     'temperature': 0.2,
                     'top_p': 0.95,
