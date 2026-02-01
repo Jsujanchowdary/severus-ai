@@ -18,11 +18,11 @@ Fetching upstream changes from https://github.com/Jsujanchowdary/severus-ai
  > git --version # 'git version 2.50.1 (Apple Git-155)'
  > git fetch --tags --force --progress -- https://github.com/Jsujanchowdary/severus-ai +refs/heads/*:refs/remotes/origin/* # timeout=10
  > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
-Checking out Revision e807998b6d51b5b67b69c99efabb94700a5db6ce (refs/remotes/origin/main)
+Checking out Revision 246b1793224ceb47a582407dc8bc40ef53c19833 (refs/remotes/origin/main)
  > git config core.sparsecheckout # timeout=10
- > git checkout -f e807998b6d51b5b67b69c99efabb94700a5db6ce # timeout=10
-Commit message: "fix: force Docker rebuild by adding comment (cache bust)"
- > git rev-list --no-walk 3d5ec48e538f231d2a9164ede49d219cf8d20878 # timeout=10
+ > git checkout -f 246b1793224ceb47a582407dc8bc40ef53c19833 # timeout=10
+Commit message: "adding files"
+ > git rev-list --no-walk 9387ffc09b56974d4cdbbb9914d96debbb80f73a # timeout=10
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] withEnv
@@ -43,10 +43,10 @@ Fetching upstream changes from https://github.com/Jsujanchowdary/severus-ai
  > git --version # 'git version 2.50.1 (Apple Git-155)'
  > git fetch --tags --force --progress -- https://github.com/Jsujanchowdary/severus-ai +refs/heads/*:refs/remotes/origin/* # timeout=10
  > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
-Checking out Revision e807998b6d51b5b67b69c99efabb94700a5db6ce (refs/remotes/origin/main)
+Checking out Revision 246b1793224ceb47a582407dc8bc40ef53c19833 (refs/remotes/origin/main)
  > git config core.sparsecheckout # timeout=10
- > git checkout -f e807998b6d51b5b67b69c99efabb94700a5db6ce # timeout=10
-Commit message: "fix: force Docker rebuild by adding comment (cache bust)"
+ > git checkout -f 246b1793224ceb47a582407dc8bc40ef53c19833 # timeout=10
+Commit message: "adding files"
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
@@ -78,10 +78,10 @@ validatingwebhookconfiguration.admissionregistration.k8s.io "kube-prometheus-sta
 level=WARN msg="unable to find exact version; falling back to closest available version" chart=kube-prometheus-stack requested="" selected=81.4.2
 Release "kube-prometheus-stack" has been upgraded. Happy Helming!
 NAME: kube-prometheus-stack
-LAST DEPLOYED: Sun Feb  1 16:49:09 2026
+LAST DEPLOYED: Sun Feb  1 17:21:42 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 22
+REVISION: 27
 DESCRIPTION: Upgrade complete
 NOTES:
 kube-prometheus-stack has been installed. Check its status by running:
@@ -114,7 +114,7 @@ Visit https://github.com/prometheus-operator/kube-prometheus for instructions on
 servicemonitor.monitoring.coreos.com/severus-ai not labeled
 + echo '📥 Importing Grafana Dashboard...'
 📥 Importing Grafana Dashboard...
-+ PF_PID=38448
++ PF_PID=45230
 + sleep 8
 + /Applications/Docker.app/Contents/Resources/bin/kubectl port-forward svc/kube-prometheus-stack-grafana 3001:80
 + DASHBOARD_PATH=config/grafana-dashboard-application.json
@@ -124,8 +124,8 @@ Found dashboard file. Importing via port-forward (http://127.0.0.1:3001)...
 + curl --fail --retry 5 --retry-delay 2 -u admin:admin123 -X POST -H 'Content-Type: application/json' -d @config/grafana-dashboard-application.json http://127.0.0.1:3001/api/dashboards/db
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  7226  100   219  100  7007   3187    99k --:--:-- --:--:-- --:--:--  103k
-{"folderUid":"","id":38,"slug":"severus-ai-application-metrics","status":"success","uid":"393ebd98-a13b-4ce1-a705-6edb7d3141ae","url":"/d/393ebd98-a13b-4ce1-a705-6edb7d3141ae/severus-ai-application-metrics","version":1}+ kill 38448
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  7226  100   219  100  7007   3985   124k --:--:-- --:--:-- --:--:--  130k
+{"folderUid":"","id":31,"slug":"severus-ai-application-metrics","status":"success","uid":"9f80784f-0c48-45a1-97f7-e46638d774f8","url":"/d/9f80784f-0c48-45a1-97f7-e46638d774f8/severus-ai-application-metrics","version":1}+ kill 45230
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
@@ -274,7 +274,7 @@ Requirement already satisfied: six>=1.5 in ./venv/lib/python3.14/site-packages (
 + curl --retry 5 --retry-delay 2 --fail http://127.0.0.1:8505
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1522  100  1522    0     0   294k      0 --:--:-- --:--:-- --:--:--  371k
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1522  100  1522    0     0   442k      0 --:--:-- --:--:-- --:--:--  495k
 <!--
  Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2026)
 
@@ -347,21 +347,18 @@ Login Succeeded
 + set -euo pipefail
 + echo '🐳 Building Docker image...'
 🐳 Building Docker image...
-+ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux build -t sujanchow/serverus-ai:v1 .
++ /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux build --no-cache -t sujanchow/serverus-ai:v1 .
 #0 building with "desktop-linux" instance using docker driver
 
 #1 [internal] load build definition from dockerfile
 #1 transferring dockerfile: 545B done
 #1 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/python:3.11-slim
-#2 ...
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
 
-#3 [auth] library/python:pull token for registry-1.docker.io
-#3 DONE 0.0s
-
-#2 [internal] load metadata for docker.io/library/python:3.11-slim
-#2 DONE 2.2s
+#3 [internal] load metadata for docker.io/library/python:3.11-slim
+#3 DONE 2.1s
 
 #4 [internal] load .dockerignore
 #4 transferring context: 2B done
@@ -370,37 +367,371 @@ Login Succeeded
 #5 [1/7] FROM docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2
 #5 DONE 0.0s
 
-#6 [internal] load build context
-#6 transferring context: 1.91MB 0.8s done
-#6 DONE 0.9s
+#6 [2/7] WORKDIR /app
+#6 CACHED
 
-#7 [2/7] WORKDIR /app
-#7 CACHED
+#7 [internal] load build context
+#7 transferring context: 1.91MB 1.6s done
+#7 DONE 1.7s
 
 #8 [3/7] RUN apt-get update && apt-get install -y     curl     && rm -rf /var/lib/apt/lists/*
-#8 CACHED
+#8 0.314 Hit:1 http://deb.debian.org/debian trixie InRelease
+#8 0.493 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#8 0.508 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#8 0.527 Get:4 http://deb.debian.org/debian trixie/main arm64 Packages [9607 kB]
+#8 0.772 Get:5 http://deb.debian.org/debian trixie-updates/main arm64 Packages [5404 B]
+#8 0.782 Get:6 http://deb.debian.org/debian-security trixie-security/main arm64 Packages [99.0 kB]
+#8 1.437 Fetched 9802 kB in 1s (8017 kB/s)
+#8 1.437 Reading package lists...
+#8 1.800 Reading package lists...
+#8 2.082 Building dependency tree...
+#8 2.160 Reading state information...
+#8 2.289 The following additional packages will be installed:
+#8 2.289   bash-completion krb5-locales libbrotli1 libcom-err2 libcurl4t64
+#8 2.289   libgnutls30t64 libgssapi-krb5-2 libidn2-0 libk5crypto3 libkeyutils1
+#8 2.289   libkrb5-3 libkrb5support0 libldap-common libldap2 libnghttp2-14 libnghttp3-9
+#8 2.289   libp11-kit0 libpsl5t64 librtmp1 libsasl2-2 libsasl2-modules
+#8 2.289   libsasl2-modules-db libssh2-1t64 libtasn1-6 libunistring5 publicsuffix
+#8 2.290 Suggested packages:
+#8 2.290   gnutls-bin krb5-doc krb5-user libsasl2-modules-gssapi-mit
+#8 2.290   | libsasl2-modules-gssapi-heimdal libsasl2-modules-ldap libsasl2-modules-otp
+#8 2.290   libsasl2-modules-sql
+#8 2.408 The following NEW packages will be installed:
+#8 2.408   bash-completion curl krb5-locales libbrotli1 libcom-err2 libcurl4t64
+#8 2.408   libgnutls30t64 libgssapi-krb5-2 libidn2-0 libk5crypto3 libkeyutils1
+#8 2.408   libkrb5-3 libkrb5support0 libldap-common libldap2 libnghttp2-14 libnghttp3-9
+#8 2.409   libp11-kit0 libpsl5t64 librtmp1 libsasl2-2 libsasl2-modules
+#8 2.409   libsasl2-modules-db libssh2-1t64 libtasn1-6 libunistring5 publicsuffix
+#8 2.459 0 upgraded, 27 newly installed, 0 to remove and 3 not upgraded.
+#8 2.459 Need to get 5457 kB of archives.
+#8 2.459 After this operation, 19.4 MB of additional disk space will be used.
+#8 2.459 Get:1 http://deb.debian.org/debian trixie/main arm64 bash-completion all 1:2.16.0-7 [319 kB]
+#8 2.518 Get:2 http://deb.debian.org/debian trixie/main arm64 krb5-locales all 1.21.3-5 [101 kB]
+#8 2.540 Get:3 http://deb.debian.org/debian trixie/main arm64 libbrotli1 arm64 1.1.0-2+b7 [308 kB]
+#8 2.542 Get:4 http://deb.debian.org/debian trixie/main arm64 libkrb5support0 arm64 1.21.3-5 [32.4 kB]
+#8 2.543 Get:5 http://deb.debian.org/debian trixie/main arm64 libcom-err2 arm64 1.47.2-3+b7 [24.9 kB]
+#8 2.555 Get:6 http://deb.debian.org/debian trixie/main arm64 libk5crypto3 arm64 1.21.3-5 [81.2 kB]
+#8 2.556 Get:7 http://deb.debian.org/debian trixie/main arm64 libkeyutils1 arm64 1.6.3-6 [9716 B]
+#8 2.581 Get:8 http://deb.debian.org/debian trixie/main arm64 libkrb5-3 arm64 1.21.3-5 [308 kB]
+#8 2.585 Get:9 http://deb.debian.org/debian trixie/main arm64 libgssapi-krb5-2 arm64 1.21.3-5 [127 kB]
+#8 2.587 Get:10 http://deb.debian.org/debian trixie/main arm64 libunistring5 arm64 1.3-2 [453 kB]
+#8 2.609 Get:11 http://deb.debian.org/debian trixie/main arm64 libidn2-0 arm64 2.3.8-2 [107 kB]
+#8 2.609 Get:12 http://deb.debian.org/debian trixie/main arm64 libsasl2-modules-db arm64 2.1.28+dfsg1-9 [20.1 kB]
+#8 2.609 Get:13 http://deb.debian.org/debian trixie/main arm64 libsasl2-2 arm64 2.1.28+dfsg1-9 [55.6 kB]
+#8 2.610 Get:14 http://deb.debian.org/debian trixie/main arm64 libldap2 arm64 2.6.10+dfsg-1 [179 kB]
+#8 2.624 Get:15 http://deb.debian.org/debian trixie/main arm64 libnghttp2-14 arm64 1.64.0-1.1 [71.4 kB]
+#8 2.640 Get:16 http://deb.debian.org/debian trixie/main arm64 libnghttp3-9 arm64 1.8.0-1 [63.2 kB]
+#8 2.657 Get:17 http://deb.debian.org/debian trixie/main arm64 libpsl5t64 arm64 0.21.2-1.1+b1 [57.1 kB]
+#8 2.680 Get:18 http://deb.debian.org/debian trixie/main arm64 libp11-kit0 arm64 0.25.5-3 [409 kB]
+#8 2.685 Get:19 http://deb.debian.org/debian trixie/main arm64 libtasn1-6 arm64 4.20.0-2 [47.3 kB]
+#8 2.711 Get:20 http://deb.debian.org/debian trixie/main arm64 libgnutls30t64 arm64 3.8.9-3+deb13u1 [1375 kB]
+#8 2.764 Get:21 http://deb.debian.org/debian trixie/main arm64 librtmp1 arm64 2.4+20151223.gitfa8646d.1-2+b5 [56.8 kB]
+#8 2.765 Get:22 http://deb.debian.org/debian trixie/main arm64 libssh2-1t64 arm64 1.11.1-1 [235 kB]
+#8 2.770 Get:23 http://deb.debian.org/debian trixie/main arm64 libcurl4t64 arm64 8.14.1-2+deb13u2 [359 kB]
+#8 2.779 Get:24 http://deb.debian.org/debian trixie/main arm64 curl arm64 8.14.1-2+deb13u2 [262 kB]
+#8 2.805 Get:25 http://deb.debian.org/debian trixie/main arm64 libldap-common all 2.6.10+dfsg-1 [35.1 kB]
+#8 2.805 Get:26 http://deb.debian.org/debian trixie/main arm64 libsasl2-modules arm64 2.1.28+dfsg1-9 [62.9 kB]
+#8 2.826 Get:27 http://deb.debian.org/debian trixie/main arm64 publicsuffix all 20250328.1952-0.1 [296 kB]
+#8 2.972 debconf: unable to initialize frontend: Dialog
+#8 2.972 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#8 2.972 debconf: falling back to frontend: Readline
+#8 2.973 debconf: unable to initialize frontend: Readline
+#8 2.973 debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC entries checked: /etc/perl /usr/local/lib/aarch64-linux-gnu/perl/5.40.1 /usr/local/share/perl/5.40.1 /usr/lib/aarch64-linux-gnu/perl5/5.40 /usr/share/perl5 /usr/lib/aarch64-linux-gnu/perl-base /usr/lib/aarch64-linux-gnu/perl/5.40 /usr/share/perl/5.40 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 8, <STDIN> line 27.)
+#8 2.973 debconf: falling back to frontend: Teletype
+#8 2.977 debconf: unable to initialize frontend: Teletype
+#8 2.977 debconf: (This frontend requires a controlling tty.)
+#8 2.977 debconf: falling back to frontend: Noninteractive
+#8 3.345 Fetched 5457 kB in 0s (13.1 MB/s)
+#8 3.355 Selecting previously unselected package bash-completion.
+#8 3.355 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 5643 files and directories currently installed.)
+#8 3.365 Preparing to unpack .../00-bash-completion_1%3a2.16.0-7_all.deb ...
+#8 3.366 Unpacking bash-completion (1:2.16.0-7) ...
+#8 3.425 Selecting previously unselected package krb5-locales.
+#8 3.425 Preparing to unpack .../01-krb5-locales_1.21.3-5_all.deb ...
+#8 3.427 Unpacking krb5-locales (1.21.3-5) ...
+#8 3.443 Selecting previously unselected package libbrotli1:arm64.
+#8 3.443 Preparing to unpack .../02-libbrotli1_1.1.0-2+b7_arm64.deb ...
+#8 3.445 Unpacking libbrotli1:arm64 (1.1.0-2+b7) ...
+#8 3.469 Selecting previously unselected package libkrb5support0:arm64.
+#8 3.469 Preparing to unpack .../03-libkrb5support0_1.21.3-5_arm64.deb ...
+#8 3.470 Unpacking libkrb5support0:arm64 (1.21.3-5) ...
+#8 3.482 Selecting previously unselected package libcom-err2:arm64.
+#8 3.482 Preparing to unpack .../04-libcom-err2_1.47.2-3+b7_arm64.deb ...
+#8 3.484 Unpacking libcom-err2:arm64 (1.47.2-3+b7) ...
+#8 3.495 Selecting previously unselected package libk5crypto3:arm64.
+#8 3.495 Preparing to unpack .../05-libk5crypto3_1.21.3-5_arm64.deb ...
+#8 3.496 Unpacking libk5crypto3:arm64 (1.21.3-5) ...
+#8 3.509 Selecting previously unselected package libkeyutils1:arm64.
+#8 3.510 Preparing to unpack .../06-libkeyutils1_1.6.3-6_arm64.deb ...
+#8 3.511 Unpacking libkeyutils1:arm64 (1.6.3-6) ...
+#8 3.522 Selecting previously unselected package libkrb5-3:arm64.
+#8 3.522 Preparing to unpack .../07-libkrb5-3_1.21.3-5_arm64.deb ...
+#8 3.525 Unpacking libkrb5-3:arm64 (1.21.3-5) ...
+#8 3.550 Selecting previously unselected package libgssapi-krb5-2:arm64.
+#8 3.551 Preparing to unpack .../08-libgssapi-krb5-2_1.21.3-5_arm64.deb ...
+#8 3.552 Unpacking libgssapi-krb5-2:arm64 (1.21.3-5) ...
+#8 3.567 Selecting previously unselected package libunistring5:arm64.
+#8 3.567 Preparing to unpack .../09-libunistring5_1.3-2_arm64.deb ...
+#8 3.568 Unpacking libunistring5:arm64 (1.3-2) ...
+#8 3.605 Selecting previously unselected package libidn2-0:arm64.
+#8 3.605 Preparing to unpack .../10-libidn2-0_2.3.8-2_arm64.deb ...
+#8 3.606 Unpacking libidn2-0:arm64 (2.3.8-2) ...
+#8 3.621 Selecting previously unselected package libsasl2-modules-db:arm64.
+#8 3.621 Preparing to unpack .../11-libsasl2-modules-db_2.1.28+dfsg1-9_arm64.deb ...
+#8 3.622 Unpacking libsasl2-modules-db:arm64 (2.1.28+dfsg1-9) ...
+#8 3.633 Selecting previously unselected package libsasl2-2:arm64.
+#8 3.634 Preparing to unpack .../12-libsasl2-2_2.1.28+dfsg1-9_arm64.deb ...
+#8 3.635 Unpacking libsasl2-2:arm64 (2.1.28+dfsg1-9) ...
+#8 3.649 Selecting previously unselected package libldap2:arm64.
+#8 3.649 Preparing to unpack .../13-libldap2_2.6.10+dfsg-1_arm64.deb ...
+#8 3.650 Unpacking libldap2:arm64 (2.6.10+dfsg-1) ...
+#8 3.666 Selecting previously unselected package libnghttp2-14:arm64.
+#8 3.666 Preparing to unpack .../14-libnghttp2-14_1.64.0-1.1_arm64.deb ...
+#8 3.669 Unpacking libnghttp2-14:arm64 (1.64.0-1.1) ...
+#8 3.681 Selecting previously unselected package libnghttp3-9:arm64.
+#8 3.681 Preparing to unpack .../15-libnghttp3-9_1.8.0-1_arm64.deb ...
+#8 3.682 Unpacking libnghttp3-9:arm64 (1.8.0-1) ...
+#8 3.694 Selecting previously unselected package libpsl5t64:arm64.
+#8 3.695 Preparing to unpack .../16-libpsl5t64_0.21.2-1.1+b1_arm64.deb ...
+#8 3.696 Unpacking libpsl5t64:arm64 (0.21.2-1.1+b1) ...
+#8 3.709 Selecting previously unselected package libp11-kit0:arm64.
+#8 3.709 Preparing to unpack .../17-libp11-kit0_0.25.5-3_arm64.deb ...
+#8 3.710 Unpacking libp11-kit0:arm64 (0.25.5-3) ...
+#8 3.735 Selecting previously unselected package libtasn1-6:arm64.
+#8 3.736 Preparing to unpack .../18-libtasn1-6_4.20.0-2_arm64.deb ...
+#8 3.738 Unpacking libtasn1-6:arm64 (4.20.0-2) ...
+#8 3.749 Selecting previously unselected package libgnutls30t64:arm64.
+#8 3.750 Preparing to unpack .../19-libgnutls30t64_3.8.9-3+deb13u1_arm64.deb ...
+#8 3.750 Unpacking libgnutls30t64:arm64 (3.8.9-3+deb13u1) ...
+#8 3.802 Selecting previously unselected package librtmp1:arm64.
+#8 3.802 Preparing to unpack .../20-librtmp1_2.4+20151223.gitfa8646d.1-2+b5_arm64.deb ...
+#8 3.803 Unpacking librtmp1:arm64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+#8 3.816 Selecting previously unselected package libssh2-1t64:arm64.
+#8 3.816 Preparing to unpack .../21-libssh2-1t64_1.11.1-1_arm64.deb ...
+#8 3.817 Unpacking libssh2-1t64:arm64 (1.11.1-1) ...
+#8 3.835 Selecting previously unselected package libcurl4t64:arm64.
+#8 3.836 Preparing to unpack .../22-libcurl4t64_8.14.1-2+deb13u2_arm64.deb ...
+#8 3.836 Unpacking libcurl4t64:arm64 (8.14.1-2+deb13u2) ...
+#8 3.862 Selecting previously unselected package curl.
+#8 3.863 Preparing to unpack .../23-curl_8.14.1-2+deb13u2_arm64.deb ...
+#8 3.864 Unpacking curl (8.14.1-2+deb13u2) ...
+#8 3.882 Selecting previously unselected package libldap-common.
+#8 3.883 Preparing to unpack .../24-libldap-common_2.6.10+dfsg-1_all.deb ...
+#8 3.884 Unpacking libldap-common (2.6.10+dfsg-1) ...
+#8 3.901 Selecting previously unselected package libsasl2-modules:arm64.
+#8 3.901 Preparing to unpack .../25-libsasl2-modules_2.1.28+dfsg1-9_arm64.deb ...
+#8 3.905 Unpacking libsasl2-modules:arm64 (2.1.28+dfsg1-9) ...
+#8 3.916 Selecting previously unselected package publicsuffix.
+#8 3.916 Preparing to unpack .../26-publicsuffix_20250328.1952-0.1_all.deb ...
+#8 3.917 Unpacking publicsuffix (20250328.1952-0.1) ...
+#8 3.943 Setting up libkeyutils1:arm64 (1.6.3-6) ...
+#8 3.948 Setting up libbrotli1:arm64 (1.1.0-2+b7) ...
+#8 3.951 Setting up libsasl2-modules:arm64 (2.1.28+dfsg1-9) ...
+#8 3.957 Setting up libnghttp2-14:arm64 (1.64.0-1.1) ...
+#8 3.961 Setting up krb5-locales (1.21.3-5) ...
+#8 3.963 Setting up libcom-err2:arm64 (1.47.2-3+b7) ...
+#8 3.968 Setting up libldap-common (2.6.10+dfsg-1) ...
+#8 3.972 Setting up libkrb5support0:arm64 (1.21.3-5) ...
+#8 3.976 Setting up libsasl2-modules-db:arm64 (2.1.28+dfsg1-9) ...
+#8 3.981 Setting up bash-completion (1:2.16.0-7) ...
+#8 3.988 Setting up libp11-kit0:arm64 (0.25.5-3) ...
+#8 3.990 Setting up libunistring5:arm64 (1.3-2) ...
+#8 3.993 Setting up libk5crypto3:arm64 (1.21.3-5) ...
+#8 4.008 Setting up libsasl2-2:arm64 (2.1.28+dfsg1-9) ...
+#8 4.011 Setting up libnghttp3-9:arm64 (1.8.0-1) ...
+#8 4.016 Setting up libtasn1-6:arm64 (4.20.0-2) ...
+#8 4.018 Setting up libkrb5-3:arm64 (1.21.3-5) ...
+#8 4.024 Setting up libssh2-1t64:arm64 (1.11.1-1) ...
+#8 4.026 Setting up publicsuffix (20250328.1952-0.1) ...
+#8 4.030 Setting up libldap2:arm64 (2.6.10+dfsg-1) ...
+#8 4.034 Setting up libidn2-0:arm64 (2.3.8-2) ...
+#8 4.036 Setting up libgssapi-krb5-2:arm64 (1.21.3-5) ...
+#8 4.042 Setting up libgnutls30t64:arm64 (3.8.9-3+deb13u1) ...
+#8 4.044 Setting up libpsl5t64:arm64 (0.21.2-1.1+b1) ...
+#8 4.048 Setting up librtmp1:arm64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+#8 4.052 Setting up libcurl4t64:arm64 (8.14.1-2+deb13u2) ...
+#8 4.055 Setting up curl (8.14.1-2+deb13u2) ...
+#8 4.060 Processing triggers for libc-bin (2.41-12+deb13u1) ...
+#8 DONE 4.1s
 
 #9 [4/7] COPY requirements.txt .
-#9 CACHED
+#9 DONE 0.0s
 
 #10 [5/7] RUN pip install --no-cache-dir -r requirements.txt
-#10 CACHED
+#10 1.101 Collecting streamlit (from -r requirements.txt (line 1))
+#10 1.155   Downloading streamlit-1.53.1-py3-none-any.whl.metadata (10 kB)
+#10 1.187 Collecting requests (from -r requirements.txt (line 2))
+#10 1.203   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+#10 1.224 Collecting python-dotenv (from -r requirements.txt (line 3))
+#10 1.239   Downloading python_dotenv-1.2.1-py3-none-any.whl.metadata (25 kB)
+#10 1.264 Collecting prometheus-client (from -r requirements.txt (line 4))
+#10 1.296   Downloading prometheus_client-0.24.1-py3-none-any.whl.metadata (2.1 kB)
+#10 1.324 Collecting pypdf (from -r requirements.txt (line 5))
+#10 1.337   Downloading pypdf-6.6.2-py3-none-any.whl.metadata (7.1 kB)
+#10 1.366 Collecting gitpython>=3.1.40 (from -r requirements.txt (line 6))
+#10 1.383   Downloading gitpython-3.1.46-py3-none-any.whl.metadata (13 kB)
+#10 1.425 Collecting altair!=5.4.0,!=5.4.1,<7,>=4.0 (from streamlit->-r requirements.txt (line 1))
+#10 1.441   Downloading altair-6.0.0-py3-none-any.whl.metadata (11 kB)
+#10 1.457 Collecting blinker<2,>=1.5.0 (from streamlit->-r requirements.txt (line 1))
+#10 1.474   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+#10 1.497 Collecting cachetools<7,>=5.5 (from streamlit->-r requirements.txt (line 1))
+#10 1.512   Downloading cachetools-6.2.6-py3-none-any.whl.metadata (5.6 kB)
+#10 1.535 Collecting click<9,>=7.0 (from streamlit->-r requirements.txt (line 1))
+#10 1.549   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+#10 1.693 Collecting numpy<3,>=1.23 (from streamlit->-r requirements.txt (line 1))
+#10 1.709   Downloading numpy-2.4.2-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl.metadata (6.6 kB)
+#10 1.731 Collecting packaging>=20 (from streamlit->-r requirements.txt (line 1))
+#10 1.744   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+#10 1.816 Collecting pandas<3,>=1.4.0 (from streamlit->-r requirements.txt (line 1))
+#10 1.829   Downloading pandas-2.3.3-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl.metadata (91 kB)
+#10 1.846      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 91.2/91.2 kB 6.5 MB/s eta 0:00:00
+#10 1.965 Collecting pillow<13,>=7.1.0 (from streamlit->-r requirements.txt (line 1))
+#10 1.983   Downloading pillow-12.1.0-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl.metadata (8.8 kB)
+#10 2.106 Collecting protobuf<7,>=3.20 (from streamlit->-r requirements.txt (line 1))
+#10 2.120   Downloading protobuf-6.33.5-cp39-abi3-manylinux2014_aarch64.whl.metadata (593 bytes)
+#10 2.174 Collecting pyarrow>=7.0 (from streamlit->-r requirements.txt (line 1))
+#10 2.188   Downloading pyarrow-23.0.0-cp311-cp311-manylinux_2_28_aarch64.whl.metadata (3.0 kB)
+#10 2.210 Collecting tenacity<10,>=8.1.0 (from streamlit->-r requirements.txt (line 1))
+#10 2.223   Downloading tenacity-9.1.2-py3-none-any.whl.metadata (1.2 kB)
+#10 2.237 Collecting toml<2,>=0.10.1 (from streamlit->-r requirements.txt (line 1))
+#10 2.250   Downloading toml-0.10.2-py2.py3-none-any.whl.metadata (7.1 kB)
+#10 2.273 Collecting typing-extensions<5,>=4.10.0 (from streamlit->-r requirements.txt (line 1))
+#10 2.287   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+#10 2.326 Collecting watchdog<7,>=2.1.5 (from streamlit->-r requirements.txt (line 1))
+#10 2.340   Downloading watchdog-6.0.0-py3-none-manylinux2014_aarch64.whl.metadata (44 kB)
+#10 2.342      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.3/44.3 kB 508.6 MB/s eta 0:00:00
+#10 2.367 Collecting pydeck<1,>=0.8.0b4 (from streamlit->-r requirements.txt (line 1))
+#10 2.380   Downloading pydeck-0.9.1-py2.py3-none-any.whl.metadata (4.1 kB)
+#10 2.412 Collecting tornado!=6.5.0,<7,>=6.0.3 (from streamlit->-r requirements.txt (line 1))
+#10 2.426   Downloading tornado-6.5.4-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (2.8 kB)
+#10 2.487 Collecting charset_normalizer<4,>=2 (from requests->-r requirements.txt (line 2))
+#10 2.501   Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (37 kB)
+#10 2.522 Collecting idna<4,>=2.5 (from requests->-r requirements.txt (line 2))
+#10 2.534   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+#10 2.567 Collecting urllib3<3,>=1.21.1 (from requests->-r requirements.txt (line 2))
+#10 2.580   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+#10 2.604 Collecting certifi>=2017.4.17 (from requests->-r requirements.txt (line 2))
+#10 2.623   Downloading certifi-2026.1.4-py3-none-any.whl.metadata (2.5 kB)
+#10 2.652 Collecting gitdb<5,>=4.0.1 (from gitpython>=3.1.40->-r requirements.txt (line 6))
+#10 2.667   Downloading gitdb-4.0.12-py3-none-any.whl.metadata (1.2 kB)
+#10 2.725 Collecting jinja2 (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 2.740   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+#10 2.766 Collecting jsonschema>=3.0 (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 2.781   Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+#10 2.826 Collecting narwhals>=1.27.1 (from altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 2.839   Downloading narwhals-2.15.0-py3-none-any.whl.metadata (13 kB)
+#10 2.863 Collecting smmap<6,>=3.0.1 (from gitdb<5,>=4.0.1->gitpython>=3.1.40->-r requirements.txt (line 6))
+#10 2.876   Downloading smmap-5.0.2-py3-none-any.whl.metadata (4.3 kB)
+#10 2.926 Collecting python-dateutil>=2.8.2 (from pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1))
+#10 2.938   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+#10 2.973 Collecting pytz>=2020.1 (from pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1))
+#10 2.988   Downloading pytz-2025.2-py2.py3-none-any.whl.metadata (22 kB)
+#10 3.007 Collecting tzdata>=2022.7 (from pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1))
+#10 3.019   Downloading tzdata-2025.3-py2.py3-none-any.whl.metadata (1.4 kB)
+#10 3.088 Collecting MarkupSafe>=2.0 (from jinja2->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 3.102   Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (2.7 kB)
+#10 3.127 Collecting attrs>=22.2.0 (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 3.141   Downloading attrs-25.4.0-py3-none-any.whl.metadata (10 kB)
+#10 3.160 Collecting jsonschema-specifications>=2023.03.6 (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 3.175   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+#10 3.201 Collecting referencing>=0.28.4 (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 3.219   Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+#10 3.417 Collecting rpds-py>=0.25.0 (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<7,>=4.0->streamlit->-r requirements.txt (line 1))
+#10 3.430   Downloading rpds_py-0.30.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (4.1 kB)
+#10 3.455 Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas<3,>=1.4.0->streamlit->-r requirements.txt (line 1))
+#10 3.469   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+#10 3.514 Downloading streamlit-1.53.1-py3-none-any.whl (9.1 MB)
+#10 3.744    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.1/9.1 MB 40.4 MB/s eta 0:00:00
+#10 3.761 Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+#10 3.763    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.7/64.7 kB 443.5 MB/s eta 0:00:00
+#10 3.782 Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+#10 3.797 Downloading prometheus_client-0.24.1-py3-none-any.whl (64 kB)
+#10 3.801    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.1/64.1 kB 58.6 MB/s eta 0:00:00
+#10 3.825 Downloading pypdf-6.6.2-py3-none-any.whl (329 kB)
+#10 3.829    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 329.1/329.1 kB 150.8 MB/s eta 0:00:00
+#10 3.857 Downloading gitpython-3.1.46-py3-none-any.whl (208 kB)
+#10 3.860    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 208.6/208.6 kB 307.3 MB/s eta 0:00:00
+#10 3.875 Downloading altair-6.0.0-py3-none-any.whl (795 kB)
+#10 3.901    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 795.4/795.4 kB 77.1 MB/s eta 0:00:00
+#10 3.925 Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+#10 3.945 Downloading cachetools-6.2.6-py3-none-any.whl (11 kB)
+#10 3.966 Downloading certifi-2026.1.4-py3-none-any.whl (152 kB)
+#10 3.968    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 152.9/152.9 kB 284.6 MB/s eta 0:00:00
+#10 3.988 Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (147 kB)
+#10 3.991    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 147.3/147.3 kB 475.4 MB/s eta 0:00:00
+#10 4.010 Downloading click-8.3.1-py3-none-any.whl (108 kB)
+#10 4.013    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 108.3/108.3 kB 328.1 MB/s eta 0:00:00
+#10 4.028 Downloading gitdb-4.0.12-py3-none-any.whl (62 kB)
+#10 4.029    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 62.8/62.8 kB 373.6 MB/s eta 0:00:00
+#10 4.043 Downloading idna-3.11-py3-none-any.whl (71 kB)
+#10 4.046    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.0/71.0 kB 56.6 MB/s eta 0:00:00
+#10 4.062 Downloading numpy-2.4.2-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (16.0 MB)
+#10 4.447    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.0/16.0 MB 40.6 MB/s eta 0:00:00
+#10 4.463 Downloading packaging-26.0-py3-none-any.whl (74 kB)
+#10 4.465    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.4/74.4 kB 212.4 MB/s eta 0:00:00
+#10 4.481 Downloading pandas-2.3.3-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl (12.2 MB)
+#10 4.790    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.2/12.2 MB 48.0 MB/s eta 0:00:00
+#10 4.805 Downloading pillow-12.1.0-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (6.3 MB)
+#10 5.131    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 19.6 MB/s eta 0:00:00
+#10 5.147 Downloading protobuf-6.33.5-cp39-abi3-manylinux2014_aarch64.whl (324 kB)
+#10 5.160    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 324.6/324.6 kB 34.8 MB/s eta 0:00:00
+#10 5.176 Downloading pyarrow-23.0.0-cp311-cp311-manylinux_2_28_aarch64.whl (44.5 MB)
+#10 8.312    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.5/44.5 MB 14.4 MB/s eta 0:00:00
+#10 8.329 Downloading pydeck-0.9.1-py2.py3-none-any.whl (6.9 MB)
+#10 8.745    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 16.7 MB/s eta 0:00:00
+#10 8.761 Downloading tenacity-9.1.2-py3-none-any.whl (28 kB)
+#10 8.777 Downloading toml-0.10.2-py2.py3-none-any.whl (16 kB)
+#10 8.796 Downloading tornado-6.5.4-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (445 kB)
+#10 8.820    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 445.7/445.7 kB 19.9 MB/s eta 0:00:00
+#10 8.836 Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+#10 8.839    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.6/44.6 kB 59.8 MB/s eta 0:00:00
+#10 8.857 Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+#10 8.862    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.6/131.6 kB 45.8 MB/s eta 0:00:00
+#10 8.880 Downloading watchdog-6.0.0-py3-none-manylinux2014_aarch64.whl (79 kB)
+#10 8.882    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.1/79.1 kB 255.0 MB/s eta 0:00:00
+#10 8.896 Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+#10 8.904    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 20.7 MB/s eta 0:00:00
+#10 8.918 Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+#10 8.926    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 90.6/90.6 kB 19.7 MB/s eta 0:00:00
+#10 8.940 Downloading narwhals-2.15.0-py3-none-any.whl (432 kB)
+#10 8.967    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 432.9/432.9 kB 17.5 MB/s eta 0:00:00
+#10 8.983 Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+#10 8.992    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 229.9/229.9 kB 29.4 MB/s eta 0:00:00
+#10 9.007 Downloading pytz-2025.2-py2.py3-none-any.whl (509 kB)
+#10 9.035    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 509.2/509.2 kB 18.7 MB/s eta 0:00:00
+#10 9.051 Downloading smmap-5.0.2-py3-none-any.whl (24 kB)
+#10 9.066 Downloading tzdata-2025.3-py2.py3-none-any.whl (348 kB)
+#10 9.085    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 348.5/348.5 kB 20.0 MB/s eta 0:00:00
+#10 9.099 Downloading attrs-25.4.0-py3-none-any.whl (67 kB)
+#10 9.102    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 67.6/67.6 kB 38.2 MB/s eta 0:00:00
+#10 9.115 Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+#10 9.132 Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (24 kB)
+#10 9.149 Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+#10 9.163 Downloading rpds_py-0.30.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (389 kB)
+#10 9.184    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 389.9/389.9 kB 20.0 MB/s eta 0:00:00
+#10 9.201 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#10 9.452 Installing collected packages: pytz, watchdog, urllib3, tzdata, typing-extensions, tornado, toml, tenacity, smmap, six, rpds-py, python-dotenv, pypdf, pyarrow, protobuf, prometheus-client, pillow, packaging, numpy, narwhals, MarkupSafe, idna, click, charset_normalizer, certifi, cachetools, blinker, attrs, requests, referencing, python-dateutil, jinja2, gitdb, pydeck, pandas, jsonschema-specifications, gitpython, jsonschema, altair, streamlit
+#10 16.10 Successfully installed MarkupSafe-3.0.3 altair-6.0.0 attrs-25.4.0 blinker-1.9.0 cachetools-6.2.6 certifi-2026.1.4 charset_normalizer-3.4.4 click-8.3.1 gitdb-4.0.12 gitpython-3.1.46 idna-3.11 jinja2-3.1.6 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 narwhals-2.15.0 numpy-2.4.2 packaging-26.0 pandas-2.3.3 pillow-12.1.0 prometheus-client-0.24.1 protobuf-6.33.5 pyarrow-23.0.0 pydeck-0.9.1 pypdf-6.6.2 python-dateutil-2.9.0.post0 python-dotenv-1.2.1 pytz-2025.2 referencing-0.37.0 requests-2.32.5 rpds-py-0.30.0 six-1.17.0 smmap-5.0.2 streamlit-1.53.1 tenacity-9.1.2 toml-0.10.2 tornado-6.5.4 typing-extensions-4.15.0 tzdata-2025.3 urllib3-2.6.3 watchdog-6.0.0
+#10 16.10 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#10 16.19 
+#10 16.19 [notice] A new release of pip is available: 24.0 -> 26.0
+#10 16.19 [notice] To update, run: pip install --upgrade pip
+#10 DONE 16.8s
 
 #11 [6/7] COPY . .
-#11 DONE 2.8s
+#11 DONE 2.7s
 
 #12 [7/7] RUN chmod +x start.sh
 #12 DONE 0.1s
 
 #13 exporting to image
 #13 exporting layers
-#13 exporting layers 1.0s done
-#13 writing image sha256:6d052597d928383867dc42dce5cfb2fee0161fd892c45102a004315c11d9fe35
-#13 writing image sha256:6d052597d928383867dc42dce5cfb2fee0161fd892c45102a004315c11d9fe35 done
+#13 exporting layers 2.1s done
+#13 writing image sha256:6b9ebbcac3cad6b09bfa9668402d6c1d3b7257db21913b9064e5879803d80ed4 done
 #13 naming to docker.io/sujanchow/serverus-ai:v1 done
-#13 DONE 1.0s
+#13 DONE 2.1s
 
-View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/w6h2h0qnxme8u1fumqsdsyljd
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/6e6juoj139rrqvuyv271agx5l
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
@@ -413,26 +744,26 @@ View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux
 + DOCKER_SOCK=/Users/jsujanchowdary/.docker/run/docker.sock
 + /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux run --rm -v /Users/jsujanchowdary/.docker/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity CRITICAL,HIGH --exit-code 0 sujanchow/serverus-ai:v1
 + tee trivy-report.txt
-2026-02-01T11:20:11Z	INFO	[vulndb] Need to update DB
-2026-02-01T11:20:11Z	INFO	[vulndb] Downloading vulnerability DB...
-2026-02-01T11:20:11Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
-655.20 KiB / 83.76 MiB [>____________________________________________________________] 0.76% ? p/s ?7.08 MiB / 83.76 MiB [----->_________________________________________________________] 8.45% ? p/s ?15.96 MiB / 83.76 MiB [----------->_________________________________________________] 19.06% ? p/s ?22.20 MiB / 83.76 MiB [------------>___________________________________] 26.50% 35.94 MiB p/s ETA 1s26.42 MiB / 83.76 MiB [--------------->________________________________] 31.54% 35.94 MiB p/s ETA 1s32.39 MiB / 83.76 MiB [------------------>_____________________________] 38.67% 35.94 MiB p/s ETA 1s38.64 MiB / 83.76 MiB [---------------------->_________________________] 46.13% 35.39 MiB p/s ETA 1s43.53 MiB / 83.76 MiB [------------------------>_______________________] 51.97% 35.39 MiB p/s ETA 1s49.10 MiB / 83.76 MiB [---------------------------->___________________] 58.63% 35.39 MiB p/s ETA 0s53.56 MiB / 83.76 MiB [------------------------------>_________________] 63.95% 34.72 MiB p/s ETA 0s56.69 MiB / 83.76 MiB [-------------------------------->_______________] 67.68% 34.72 MiB p/s ETA 0s62.08 MiB / 83.76 MiB [----------------------------------->____________] 74.12% 34.72 MiB p/s ETA 0s65.91 MiB / 83.76 MiB [------------------------------------->__________] 78.69% 33.80 MiB p/s ETA 0s70.25 MiB / 83.76 MiB [---------------------------------------->_______] 83.87% 33.80 MiB p/s ETA 0s74.50 MiB / 83.76 MiB [------------------------------------------>_____] 88.95% 33.80 MiB p/s ETA 0s79.05 MiB / 83.76 MiB [--------------------------------------------->__] 94.38% 33.03 MiB p/s ETA 0s83.36 MiB / 83.76 MiB [----------------------------------------------->] 99.53% 33.03 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 33.03 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 31.41 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 31.41 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 31.41 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 29.38 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 29.38 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 29.38 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 27.49 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 27.49 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 27.49 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [-------------------------------------------------] 100.00% 15.64 MiB p/s 5.6s2026-02-01T11:20:17Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
-2026-02-01T11:20:17Z	INFO	[vuln] Vulnerability scanning is enabled
-2026-02-01T11:20:17Z	INFO	[secret] Secret scanning is enabled
-2026-02-01T11:20:17Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
-2026-02-01T11:20:17Z	INFO	[secret] Please see https://trivy.dev/docs/v0.68/guide/scanner/secret#recommendation for faster secret detection
-2026-02-01T11:20:29Z	INFO	[python] Licenses acquired from one or more METADATA files may be subject to additional terms. Use `--debug` flag to see all affected packages.
-2026-02-01T11:20:29Z	WARN	Third-party SBOM may lead to inaccurate vulnerability detection
-2026-02-01T11:20:29Z	WARN	Recommend using Trivy to generate SBOMs
-2026-02-01T11:20:29Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="usr/local/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
-2026-02-01T11:20:33Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/lib/python3.14/site-packages/pydeck/nbextension/static/index.js.map" size (MB)=11
-2026-02-01T11:20:34Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
-2026-02-01T11:20:36Z	INFO	Detected OS	family="debian" version="13.3"
-2026-02-01T11:20:36Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=115
-2026-02-01T11:20:36Z	INFO	Number of language-specific files	num=1
-2026-02-01T11:20:36Z	INFO	[python-pkg] Detecting vulnerabilities...
-2026-02-01T11:20:36Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.68/guide/scanner/vulnerability#severity-selection for details.
-2026-02-01T11:20:36Z	INFO	Table result includes only package filenames. Use '--format json' option to get the full path to the package file.
+2026-02-01T11:53:03Z	INFO	[vulndb] Need to update DB
+2026-02-01T11:53:03Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-02-01T11:53:03Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+623.17 KiB / 83.76 MiB [>____________________________________________________________] 0.73% ? p/s ?7.03 MiB / 83.76 MiB [----->_________________________________________________________] 8.39% ? p/s ?16.59 MiB / 83.76 MiB [------------>________________________________________________] 19.80% ? p/s ?21.26 MiB / 83.76 MiB [------------>___________________________________] 25.38% 34.35 MiB p/s ETA 1s26.02 MiB / 83.76 MiB [-------------->_________________________________] 31.07% 34.35 MiB p/s ETA 1s34.10 MiB / 83.76 MiB [------------------->____________________________] 40.72% 34.35 MiB p/s ETA 1s38.10 MiB / 83.76 MiB [--------------------->__________________________] 45.49% 33.95 MiB p/s ETA 1s43.84 MiB / 83.76 MiB [------------------------->______________________] 52.34% 33.95 MiB p/s ETA 1s49.23 MiB / 83.76 MiB [---------------------------->___________________] 58.77% 33.95 MiB p/s ETA 1s54.62 MiB / 83.76 MiB [------------------------------->________________] 65.21% 33.53 MiB p/s ETA 0s59.22 MiB / 83.76 MiB [--------------------------------->______________] 70.70% 33.53 MiB p/s ETA 0s63.87 MiB / 83.76 MiB [------------------------------------>___________] 76.26% 33.53 MiB p/s ETA 0s68.48 MiB / 83.76 MiB [--------------------------------------->________] 81.76% 32.86 MiB p/s ETA 0s71.95 MiB / 83.76 MiB [----------------------------------------->______] 85.91% 32.86 MiB p/s ETA 0s76.87 MiB / 83.76 MiB [-------------------------------------------->___] 91.78% 32.86 MiB p/s ETA 0s81.03 MiB / 83.76 MiB [---------------------------------------------->_] 96.74% 32.09 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 32.09 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 32.09 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 30.31 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 30.31 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 30.31 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 28.35 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 28.35 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 28.35 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 26.53 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [---------------------------------------------->] 100.00% 26.53 MiB p/s ETA 0s83.76 MiB / 83.76 MiB [-------------------------------------------------] 100.00% 16.55 MiB p/s 5.3s2026-02-01T11:53:09Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-02-01T11:53:09Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-02-01T11:53:09Z	INFO	[secret] Secret scanning is enabled
+2026-02-01T11:53:09Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-02-01T11:53:09Z	INFO	[secret] Please see https://trivy.dev/docs/v0.68/guide/scanner/secret#recommendation for faster secret detection
+2026-02-01T11:53:21Z	INFO	[python] Licenses acquired from one or more METADATA files may be subject to additional terms. Use `--debug` flag to see all affected packages.
+2026-02-01T11:53:21Z	WARN	Third-party SBOM may lead to inaccurate vulnerability detection
+2026-02-01T11:53:21Z	WARN	Recommend using Trivy to generate SBOMs
+2026-02-01T11:53:21Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="usr/local/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
+2026-02-01T11:53:26Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/lib/python3.14/site-packages/pydeck/nbextension/static/index.js.map" size (MB)=11
+2026-02-01T11:53:27Z	WARN	[secret] The size of the scanned file is too large. It is recommended to use `--skip-files` for this file to avoid high memory consumption.	file_path="app/venv/share/jupyter/nbextensions/pydeck/index.js.map" size (MB)=11
+2026-02-01T11:53:28Z	INFO	Detected OS	family="debian" version="13.3"
+2026-02-01T11:53:28Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=115
+2026-02-01T11:53:28Z	INFO	Number of language-specific files	num=1
+2026-02-01T11:53:28Z	INFO	[python-pkg] Detecting vulnerabilities...
+2026-02-01T11:53:28Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.68/guide/scanner/vulnerability#severity-selection for details.
+2026-02-01T11:53:28Z	INFO	Table result includes only package filenames. Use '--format json' option to get the full path to the package file.
 
 Report Summary
 
@@ -567,13 +898,7 @@ Report Summary
 │ app/venv/lib/python3.14/site-packages/rpds_py-0.30.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
 │ app/venv/lib/python3.14/site-packages/six-1.17.0.dist-info/METADATA              │ python-pkg │        0        │    -    │
-├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─�
-📣 [34mNotices:[0m
-  - Version 0.69.0 of Trivy is now available, current version is 0.68.2
-
-To suppress version checks, run Trivy scans with the --skip-version-check flag
-
-��───────────────┼─────────┤
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
 │ app/venv/lib/python3.14/site-packages/smmap-5.0.2.dist-info/METADATA             │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
 │ app/venv/lib/python3.14/site-packages/sniffio-1.3.1.dist-info/METADATA           │ python-pkg │        0        │    -    │
@@ -639,7 +964,13 @@ To suppress version checks, run Trivy scans with the --skip-version-check flag
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
 │ usr/local/lib/python3.11/site-packages/pandas-2.3.3.dist-info/METADATA           │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
-│ usr/local/lib/python3.11/site-packages/pillow-12.1.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
+│ usr/local/lib/pytho
+📣 [34mNotices:[0m
+  - Version 0.69.0 of Trivy is now available, current version is 0.68.2
+
+To suppress version checks, run Trivy scans with the --skip-version-check flag
+
+n3.11/site-packages/pillow-12.1.0.dist-info/METADATA          │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
 │ usr/local/lib/python3.11/site-packages/pip-24.0.dist-info/METADATA               │ python-pkg │        0        │    -    │
 ├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
@@ -823,11 +1154,11 @@ Recording fingerprints
 👉 Push attempt 1...
 + /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/serverus-ai:v1
 The push refers to repository [docker.io/sujanchow/serverus-ai]
-abb1fa270209: Preparing
-4ee8672c13cd: Preparing
-7fac8074706f: Preparing
-66091ca72b93: Preparing
-41144680d5e4: Preparing
+10f822424f9f: Preparing
+5fa3d598e8d6: Preparing
+b0b0c54d90a7: Preparing
+99e3f84b5835: Preparing
+311c93408c41: Preparing
 9d94a520dea6: Preparing
 14560f658b88: Preparing
 76c58cdecda3: Preparing
@@ -838,17 +1169,17 @@ abb1fa270209: Preparing
 76c58cdecda3: Waiting
 188b50d8162b: Waiting
 37127a0fa4c7: Waiting
-66091ca72b93: Layer already exists
-7fac8074706f: Layer already exists
-41144680d5e4: Layer already exists
-9d94a520dea6: Layer already exists
+10f822424f9f: Pushed
+99e3f84b5835: Pushed
 14560f658b88: Layer already exists
-76c58cdecda3: Layer already exists
+9d94a520dea6: Layer already exists
 188b50d8162b: Layer already exists
+76c58cdecda3: Layer already exists
+311c93408c41: Pushed
 37127a0fa4c7: Layer already exists
-abb1fa270209: Pushed
-4ee8672c13cd: Pushed
-v1: digest: sha256:4b9fc1563b73b4b7f9f7aab2f3d72da868443cc287c490d058317ffe998565ef size: 2416
+b0b0c54d90a7: Pushed
+5fa3d598e8d6: Pushed
+v1: digest: sha256:684c061af21f3e03cc7b7bc9c21145d54232e56956142431291a0efb4ba2afbf size: 2416
 + echo '✅ Docker push succeeded'
 ✅ Docker push succeeded
 + exit 0
@@ -868,14 +1199,11 @@ v1: digest: sha256:4b9fc1563b73b4b7f9f7aab2f3d72da868443cc287c490d058317ffe99856
 #1 transferring dockerfile: 461B done
 #1 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/ubuntu:22.04
-#2 ...
+#2 [auth] library/ubuntu:pull token for registry-1.docker.io
+#2 DONE 0.0s
 
-#3 [auth] library/ubuntu:pull token for registry-1.docker.io
-#3 DONE 0.0s
-
-#2 [internal] load metadata for docker.io/library/ubuntu:22.04
-#2 DONE 2.3s
+#3 [internal] load metadata for docker.io/library/ubuntu:22.04
+#3 DONE 2.3s
 
 #4 [internal] load .dockerignore
 #4 transferring context: 2B done
@@ -888,10 +1216,10 @@ v1: digest: sha256:4b9fc1563b73b4b7f9f7aab2f3d72da868443cc287c490d058317ffe99856
 #6 transferring context: 35B done
 #6 DONE 0.0s
 
-#7 [2/5] RUN apt-get update &&     apt-get install -y curl bash ca-certificates &&     curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl &&     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl &&     rm -rf /var/lib/apt/lists/* kubectl
+#7 [3/5] WORKDIR /stress
 #7 CACHED
 
-#8 [3/5] WORKDIR /stress
+#8 [2/5] RUN apt-get update &&     apt-get install -y curl bash ca-certificates &&     curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl &&     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl &&     rm -rf /var/lib/apt/lists/* kubectl
 #8 CACHED
 
 #9 [4/5] COPY stress_pod.sh .
@@ -902,12 +1230,12 @@ v1: digest: sha256:4b9fc1563b73b4b7f9f7aab2f3d72da868443cc287c490d058317ffe99856
 
 #11 exporting to image
 #11 exporting layers done
-#11 writing image sha256:78cd5c53c856ddcdf1c646f42f4807a2f19bc55489ed4a5901987bd51cfcee4e done
+#11 writing image sha256:b24d1f271ea13b449fd912435e05bfc0be04e54b3de9050a716300d4e89aa519 done
 #11 naming to docker.io/sujanchow/stress-pod:v1 done
 #11 naming to docker.io/sujanchow/stress-pod:latest done
 #11 DONE 0.0s
 
-View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/x3d6t7t03vngv93i6ricewrkj
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/yadc9f5pfjlsad94mo9f45e4v
 + echo '✅ Stress-pod image built successfully'
 ✅ Stress-pod image built successfully
 [Pipeline] }
@@ -920,30 +1248,30 @@ View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux
 📤 Pushing stress-pod image to registry...
 + /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/stress-pod:v1
 The push refers to repository [docker.io/sujanchow/stress-pod]
-de238e9db3a1: Preparing
-a788b2ed1dd1: Preparing
+a55191d7f039: Preparing
+3e745b449442: Preparing
 0fb6459bab15: Preparing
 d9e0617b46d5: Preparing
 168d3f8561df: Preparing
-a788b2ed1dd1: Layer already exists
-d9e0617b46d5: Layer already exists
-de238e9db3a1: Layer already exists
+3e745b449442: Layer already exists
+a55191d7f039: Layer already exists
 168d3f8561df: Layer already exists
+d9e0617b46d5: Layer already exists
 0fb6459bab15: Layer already exists
-v1: digest: sha256:8d3a65fa6637d4965d2802817a2826cf19ccf51c2a9a34d53f48691aeae68a03 size: 1363
+v1: digest: sha256:c1c6c7c25ff8e1a67a084ea53adbed9f3f06789035160728210cfb364168f2f0 size: 1363
 + /Applications/Docker.app/Contents/Resources/bin/docker --context desktop-linux push sujanchow/stress-pod:latest
 The push refers to repository [docker.io/sujanchow/stress-pod]
-de238e9db3a1: Preparing
-a788b2ed1dd1: Preparing
+a55191d7f039: Preparing
+3e745b449442: Preparing
 0fb6459bab15: Preparing
 d9e0617b46d5: Preparing
 168d3f8561df: Preparing
 d9e0617b46d5: Layer already exists
 0fb6459bab15: Layer already exists
+3e745b449442: Layer already exists
+a55191d7f039: Layer already exists
 168d3f8561df: Layer already exists
-de238e9db3a1: Layer already exists
-a788b2ed1dd1: Layer already exists
-latest: digest: sha256:8d3a65fa6637d4965d2802817a2826cf19ccf51c2a9a34d53f48691aeae68a03 size: 1363
+latest: digest: sha256:c1c6c7c25ff8e1a67a084ea53adbed9f3f06789035160728210cfb364168f2f0 size: 1363
 + echo '✅ Stress-pod image pushed successfully'
 ✅ Stress-pod image pushed successfully
 [Pipeline] }
@@ -959,10 +1287,10 @@ job.batch "stress-pod" deleted from default namespace
 + /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --set image.repository=sujanchow/serverus-ai --set image.tag=v1
 Release "severus-ai" has been upgraded. Happy Helming!
 NAME: severus-ai
-LAST DEPLOYED: Sun Feb  1 16:51:32 2026
+LAST DEPLOYED: Sun Feb  1 17:24:20 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 83
+REVISION: 87
 DESCRIPTION: Upgrade complete
 TEST SUITE: None
 + echo '⏳ Waiting for rollout to complete (Ensuring No 503 during tests)...'
@@ -1003,29 +1331,22 @@ deployment "severus-ai" successfully rolled out
 + echo '🧠 Testing Ollama connectivity (NON-BLOCKING)'
 🧠 Testing Ollama connectivity (NON-BLOCKING)
 ++ /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai --field-selector=status.phase=Running -o 'jsonpath={.items[0].metadata.name}'
-+ POD=severus-ai-6694446bdc-8jd4s
-+ '[' -z severus-ai-6694446bdc-8jd4s ']'
-+ echo 'Using pod: severus-ai-6694446bdc-8jd4s'
-Using pod: severus-ai-6694446bdc-8jd4s
-+ /Applications/Docker.app/Contents/Resources/bin/kubectl exec severus-ai-6694446bdc-8jd4s -- curl -s --max-time 5 http://host.docker.internal:11434/api/tags
-Defaulted container "severus-ai" out of: severus-ai, metrics-exporter
++ POD=severus-ai-6694446bdc-qvvs9
 + echo '🩺 Checking Kubernetes health...'
 🩺 Checking Kubernetes health...
 + /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai
 NAME                          READY   STATUS    RESTARTS   AGE
-severus-ai-6694446bdc-8jd4s   2/2     Running   0          31m
+severus-ai-6694446bdc-qvvs9   2/2     Running   0          22m
++ '[' -z severus-ai-6694446bdc-qvvs9 ']'
++ echo 'Using pod: severus-ai-6694446bdc-qvvs9'
+Using pod: severus-ai-6694446bdc-qvvs9
++ /Applications/Docker.app/Contents/Resources/bin/kubectl exec severus-ai-6694446bdc-qvvs9 -- curl -s --max-time 5 http://host.docker.internal:11434/api/tags
+Defaulted container "severus-ai" out of: severus-ai, metrics-exporter
+{"models":[{"name":"qwen2.5-coder:7b","model":"qwen2.5-coder:7b","modified_at":"2026-02-01T15:15:41.134210946+05:30","size":4683087561,"digest":"dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364","details":{"parent_model":"","format":"gguf","family":"qwen2","families":["qwen2"],"parameter_size":"7.6B","quantization_level":"Q4_K_M"}},{"name":"gemma3:1b","model":"gemma3:1b","modified_at":"2026-01-20T20:43:28.370933516+05:30","size":815319791,"digest":"8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc","details":{"parent_model":"","format":"gguf","family":"gemma3","families":["gemma3"],"parameter_size":"999.89M","quantization_level":"Q4_K_M"}},{"name":"llama3:latest","model":"llama3:latest","modified_at":"2024-09-11T09:02:22.520828542+05:30","size":4661224676,"digest":"365c0bd3c000a25d28ddbf732fe1c6add414de7275464c4e4d1c3b5fcb5d8ad1","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}},{"name":"llama3.1:latest","model":"llama3.1:latest","modified_at":"2024-09-11T08:41:16.857717856+05:30","size":4661230766,"digest":"42182419e9508c30c4b1fe55015f06b65f4ca4b9e28a744be55008d21998a093","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}}]}+ echo '✅ Ollama reachable'
+✅ Ollama reachable
++ exit 0
 [Pipeline] }
-[Pipeline] // stage
 [Pipeline] }
-+ mkdir -p k3s-validation-logs
-+ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
-+ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.26
-level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
-level=DEBUG msg="getting history for release" release=severus-ai
-level=DEBUG msg="preparing upgrade" name=severus-ai
-level=DEBUG msg="number of dependencies in the chart" dependencies=0
-level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
-level=DEBUG msg="performing update" name=severus-ai
 + echo '📜 Checking logs...'
 📜 Checking logs...
 + /Applications/Docker.app/Contents/Resources/bin/kubectl logs deployment/severus-ai
@@ -1040,45 +1361,22 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 
   URL: http://0.0.0.0:8501
 
-2026-02-01 11:03:56.548 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 672, in code_to_exec
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/app.py", line 8, in <module>
-    hgctjkb
-NameError: name 'hgctjkb' is not defined
-2026-02-01 11:13:02.050 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 672, in code_to_exec
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/app.py", line 8, in <module>
-    hgctjkb
-NameError: name 'hgctjkb' is not defined
-2026-02-01 11:17:34.944 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 672, in code_to_exec
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/app.py", line 8, in <module>
-    hgctjkb
-NameError: name 'hgctjkb' is not defined
-[Pipeline] }
+[2026-02-01 11:41:49,196] [INFO] auth - User signed up: sujancho
+[2026-02-01 11:41:53,772] [INFO] auth - User logged in: sujancho
+[2026-02-01 11:41:55,138] [INFO] chat - Chat created: 1 for sujancho
++ mkdir -p k3s-validation-logs
++ for VERSION in v1.26 v1.27 v1.28 v1.29 v1.30 v1.31 v1.32 v1.33 v1.34 v1.35
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --dry-run --debug --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set global.k3sVersion=v1.26
+level=WARN msg="--dry-run is deprecated and should be replaced with '--dry-run=client'"
+level=DEBUG msg="getting history for release" release=severus-ai
+level=DEBUG msg="preparing upgrade" name=severus-ai
+level=DEBUG msg="number of dependencies in the chart" dependencies=0
+level=DEBUG msg="determined release apply method" server_side_apply=true previous_release_apply_method=ssa
+level=DEBUG msg="performing update" name=severus-ai
+[Pipeline] // stage
 [Pipeline] // stage
 [Pipeline] }
-{"models":[{"name":"qwen2.5-coder:7b","model":"qwen2.5-coder:7b","modified_at":"2026-02-01T15:15:41.134210946+05:30","size":4683087561,"digest":"dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364","details":{"parent_model":"","format":"gguf","family":"qwen2","families":["qwen2"],"parameter_size":"7.6B","quantization_level":"Q4_K_M"}},{"name":"gemma3:1b","model":"gemma3:1b","modified_at":"2026-01-20T20:43:28.370933516+05:30","size":815319791,"digest":"8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc","details":{"parent_model":"","format":"gguf","family":"gemma3","families":["gemma3"],"parameter_size":"999.89M","quantization_level":"Q4_K_M"}},{"name":"llama3:latest","model":"llama3:latest","modified_at":"2024-09-11T09:02:22.520828542+05:30","size":4661224676,"digest":"365c0bd3c000a25d28ddbf732fe1c6add414de7275464c4e4d1c3b5fcb5d8ad1","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}},{"name":"llama3.1:latest","model":"llama3.1:latest","modified_at":"2024-09-11T08:41:16.857717856+05:30","size":4661230766,"digest":"42182419e9508c30c4b1fe55015f06b65f4ca4b9e28a744be55008d21998a093","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"8.0B","quantization_level":"Q4_0"}}]}+ echo '✅ Ollama reachable'
-✅ Ollama reachable
-+ exit 0
+[Pipeline] }
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] }
@@ -1172,66 +1470,301 @@ Recording fingerprints
 [Pipeline] // stage
 [Pipeline] }
 + curl --retry 5 --retry-delay 2 --fail -s -H 'Host: severus-ai.local' http://127.0.0.1:8081
-+ grep -q 'Severus AI'
-Post stage
-[Pipeline] sh
-+ echo '❌ Ingress Test Failed. Fetching pod logs...'
-❌ Ingress Test Failed. Fetching pod logs...
-+ /Applications/Docker.app/Contents/Resources/bin/kubectl logs -l app=severus-ai --all-containers=true --tail=100
-🚀 Starting metrics exporter...
-🚀 Starting Severus AI with metrics...
-
-Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
-
-
-  You can now view your Streamlit app in your browser.
-
-  URL: http://0.0.0.0:8501
-
-2026-02-01 11:03:56.548 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 672, in code_to_exec
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/app.py", line 8, in <module>
-    hgctjkb
-NameError: name 'hgctjkb' is not defined
-2026-02-01 11:13:02.050 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 672, in code_to_exec
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/app.py", line 8, in <module>
-    hgctjkb
-NameError: name 'hgctjkb' is not defined
-2026-02-01 11:17:34.944 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 672, in code_to_exec
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/app.py", line 8, in <module>
-    hgctjkb
-NameError: name 'hgctjkb' is not defined
++ grep -q Streamlit
++ echo '✅ Ingress reachable via Traefik'
+✅ Ingress reachable via Traefik
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] }
-Failed in branch Ingress Reachability Test
 [Pipeline] // parallel
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
 [Pipeline] { (Performance Evaluation)
-Stage "Performance Evaluation" skipped due to earlier failure(s)
-[Pipeline] getContext
+[Pipeline] sh
++ set -euo pipefail
++ echo '🔥 Starting Performance Evaluation...'
+🔥 Starting Performance Evaluation...
++ /Applications/Docker.app/Contents/Resources/bin/kubectl delete job stress-pod --ignore-not-found=true
+job.batch "stress-pod" deleted from default namespace
++ sleep 5
++ echo 'Deploying stress test job...'
+Deploying stress test job...
++ /opt/homebrew/bin/helm upgrade --install severus-ai helm/severus-ai --set image.repository=sujanchow/serverus-ai --set image.tag=v1 --set stress.enabled=true
+Release "severus-ai" has been upgraded. Happy Helming!
+NAME: severus-ai
+LAST DEPLOYED: Sun Feb  1 17:24:34 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 88
+DESCRIPTION: Upgrade complete
+TEST SUITE: None
++ echo 'Waiting for performance evaluation job to start...'
+Waiting for performance evaluation job to start...
++ sleep 10
++ echo 'Monitoring performance evaluation progress...'
+Monitoring performance evaluation progress...
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (1/60)'
+Performance Evaluation still running... (1/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (2/60)'
+Performance Evaluation still running... (2/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (3/60)'
+Performance Evaluation still running... (3/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (4/60)'
+Performance Evaluation still running... (4/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (5/60)'
+Performance Evaluation still running... (5/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (6/60)'
+Performance Evaluation still running... (6/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (7/60)'
+Performance Evaluation still running... (7/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' '' = True ']'
++ '[' '' = True ']'
++ echo 'Performance Evaluation still running... (8/60)'
+Performance Evaluation still running... (8/60)
++ sleep 10
++ for i in '{1..60}'
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}'
++ STATUS=True
+++ /Applications/Docker.app/Contents/Resources/bin/kubectl get job stress-pod -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}'
++ FAILED=
++ '[' True = True ']'
++ echo '✅ Performance Evaluation completed successfully'
+✅ Performance Evaluation completed successfully
++ break
++ echo ''
+
++ echo ==============================================
+==============================================
++ echo 'STRESS TEST LOGS'
+STRESS TEST LOGS
++ echo ==============================================
+==============================================
++ /Applications/Docker.app/Contents/Resources/bin/kubectl logs job/stress-pod
+Waiting for target to be ready: http://severus-ai:8501
+✅ Target is ready: http://severus-ai:8501
+
+==============================================
+STRESS TEST STARTED at Sun Feb  1 11:54:38 UTC 2026
+Targets            : http://severus-ai:8501
+Requests per run   : 2000
+Concurrency        : 150
+Runs               : 10
+Sleep between runs : 2s
+==============================================
+
+----------------------------------------------
+RUN 1 of 10 started at Sun Feb  1 11:54:38 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 1 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 2 of 10 started at Sun Feb  1 11:54:44 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 2 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 3 of 10 started at Sun Feb  1 11:54:50 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 3 COMPLETED
+Time taken : 5s
+
+----------------------------------------------
+RUN 4 of 10 started at Sun Feb  1 11:54:57 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 4 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 5 of 10 started at Sun Feb  1 11:55:03 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 5 COMPLETED
+Time taken : 3s
+
+----------------------------------------------
+RUN 6 of 10 started at Sun Feb  1 11:55:08 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 6 COMPLETED
+Time taken : 3s
+
+----------------------------------------------
+RUN 7 of 10 started at Sun Feb  1 11:55:13 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 7 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 8 of 10 started at Sun Feb  1 11:55:19 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 8 COMPLETED
+Time taken : 3s
+
+----------------------------------------------
+RUN 9 of 10 started at Sun Feb  1 11:55:24 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 9 COMPLETED
+Time taken : 4s
+
+----------------------------------------------
+RUN 10 of 10 started at Sun Feb  1 11:55:30 UTC 2026
+----------------------------------------------
+Sending 2000 requests to http://severus-ai:8501
+
+RUN 10 COMPLETED
+Time taken : 3s
+Waiting 30 seconds for final metrics collection...
+
+==============================================
+ALL RUNS COMPLETED
+Success requests     : 20000
+Failed requests      : 0
+Total execution time : 85s
+==============================================
+
+==============================================
+RESOURCE USAGE SUMMARY (PEAK)
+==============================================
+Pod: severus-ai-6694446bdc-zbhtx         CPU_peak=64m Memory_peak=52Mi
+Pod: alertmanager-kube-prometheus-stack-alertmanager-0 CPU_peak=2m Memory_peak=57Mi
+Pod: stress-pod-bl98g                    CPU_peak=2895m Memory_peak=9Mi
+Pod: kube-prometheus-stack-kube-state-metrics-774cbcbd5-crx6h CPU_peak=2m Memory_peak=37Mi
+Pod: kube-prometheus-stack-grafana-6bc6c47c85-pv6sr CPU_peak=8m Memory_peak=443Mi
+Pod: severus-ai-6694446bdc-5vscj         CPU_peak=44m Memory_peak=52Mi
+Pod: stress-pod-pljx4                    CPU_peak=2925m Memory_peak=8Mi
+Pod: severus-ai-6694446bdc-qvvs9         CPU_peak=62m Memory_peak=129Mi
+Pod: severus-ai-6694446bdc-fhc2j         CPU_peak=68m Memory_peak=52Mi
+Pod: kube-prometheus-stack-prometheus-node-exporter-gc4pd CPU_peak=3m Memory_peak=28Mi
+Pod: kube-prometheus-stack-operator-6d64c465c4-8d7d5 CPU_peak=5m Memory_peak=72Mi
+Pod: severus-ai-6694446bdc-bv77w         CPU_peak=54m Memory_peak=52Mi
+Pod: prometheus-kube-prometheus-stack-prometheus-0 CPU_peak=9m Memory_peak=460Mi
+
+Validation started
+----------------------------------------------
+Service label       : app=severus-ai
+Running pods        : 5
+✅ Pods are running for label: app=severus-ai
+----------------------------------------------
+Overall validation status : PASS
+
+✅ STRESS TEST COMPLETED SUCCESSFULLY
++ echo ''
+
++ echo ==============================================
+==============================================
++ echo 'HPA STATUS'
+HPA STATUS
++ echo ==============================================
+==============================================
++ /Applications/Docker.app/Contents/Resources/bin/kubectl get hpa severus-ai-hpa
+NAME             REFERENCE               TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+severus-ai-hpa   Deployment/severus-ai   cpu: 15%/50%   1         5         5          2d19h
++ echo ''
+
++ echo ==============================================
+==============================================
++ echo 'POD STATUS'
+POD STATUS
++ echo ==============================================
+==============================================
++ /Applications/Docker.app/Contents/Resources/bin/kubectl get pods -l app=severus-ai
+NAME                          READY   STATUS    RESTARTS   AGE
+severus-ai-6694446bdc-5vscj   2/2     Running   0          88s
+severus-ai-6694446bdc-bv77w   2/2     Running   0          58s
+severus-ai-6694446bdc-fhc2j   2/2     Running   0          73s
+severus-ai-6694446bdc-qvvs9   2/2     Running   0          23m
+severus-ai-6694446bdc-zbhtx   2/2     Running   0          73s
++ echo ''
+
++ echo '✅ Performance Evaluation stage completed'
+✅ Performance Evaluation stage completed
+Post stage
+[Pipeline] sh
++ /Applications/Docker.app/Contents/Resources/bin/kubectl logs job/stress-pod
++ /Applications/Docker.app/Contents/Resources/bin/kubectl describe hpa severus-ai-hpa
+[Pipeline] archiveArtifacts
+Archiving artifacts
+Recording fingerprints
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] stage
@@ -1239,16 +1772,16 @@ Stage "Performance Evaluation" skipped due to earlier failure(s)
 [Pipeline] script
 [Pipeline] {
 [Pipeline] echo
-🤖 Running AI Debugger (Status: failure)...
+🤖 Running AI Debugger (Status: success)...
 [Pipeline] sh
 + echo '=== BUILD INFORMATION ==='
-+ echo 'Build Number: 84'
-+ echo 'Build Result: failure'
++ echo 'Build Number: 89'
++ echo 'Build Result: success'
 + echo 'Job Name: severus-ai'
-+ echo 'Build URL: http://localhost:8080/job/severus-ai/84/'
++ echo 'Build URL: http://localhost:8080/job/severus-ai/89/'
 + echo ''
 + echo '=== RECENT BUILD OUTPUT ==='
-+ curl -s -u admin:admin http://localhost:8080/job/severus-ai/84/consoleText
++ curl -s -u admin:admin http://localhost:8080/job/severus-ai/89/consoleText
 + tail -500
 [Pipeline] sh
 + set +e
@@ -1278,28 +1811,12 @@ Stage "Performance Evaluation" skipped due to earlier failure(s)
 ++ export PS1
 ++ hash -r
 + pip install -q -r requirements.txt
-+ python3 ai_debugger.py --repo-path /Users/jsujanchowdary/.jenkins/workspace/severus-ai --log-path /Users/jsujanchowdary/.jenkins/workspace/severus-ai/jenkins_console.log --output-path report.txt --model qwen2.5-coder:7b --status failure
++ python3 ai_debugger.py --repo-path /Users/jsujanchowdary/.jenkins/workspace/severus-ai --log-path /Users/jsujanchowdary/.jenkins/workspace/severus-ai/jenkins_console.log --output-path report.txt --model qwen2.5-coder:7b --status success
 ================================================================================
-🚀 AI Debugger Agent for Jenkins (Mode: FAILURE)
+🚀 AI Debugger Agent for Jenkins (Mode: SUCCESS)
 ================================================================================
-
-📂 Step 1: Ingesting codebase...
-✓ Indexed 43 files
-
-📋 Step 2: Parsing Jenkins logs...
-✓ Log file loaded: 30650 characters
-
-🔍 Step 3: Extracting error token...
-✓ Found error token: 'hgctjkb'
-
-🎯 Step 4: Locating in codebase...
-
-=== AUTOMATED ERROR LOCATION FINDINGS ===
-================================================================================
-
-
 ✅ Report saved to report.txt
-⚠️  Token not found in codebase
+✅ Analysis complete
 [Pipeline] archiveArtifacts
 Archiving artifacts
 [Pipeline] }
@@ -1313,5 +1830,4 @@ Archiving artifacts
 [Pipeline] }
 [Pipeline] // node
 [Pipeline] End of Pipeline
-ERROR: script returned exit code 1
-Finished: FAILURE
+Finished: SUCCESS
