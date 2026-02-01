@@ -174,15 +174,38 @@ All pipeline stages completed successfully. No issues detected.
         cmd_not_found = re.findall(r'(\w+): command not found', log_content)
         
         for cmd in cmd_not_found:
-            # Search codebase for this command
+            # Search codebase for this command with line numbers
+            current_file = None
+            file_lines = []
+            in_file = False
+            
             for line in codebase_context.split('\n'):
-                if f'FILE: ' in line:
+                if 'FILE: ' in line:
+                    # Process previous file if any
+                    if current_file and file_lines:
+                        for line_num, content in enumerate(file_lines, 1):
+                            if cmd in content and cmd not in current_file:
+                                findings.append(f"**FOUND ERROR**: '{cmd}' in file '{current_file}' at line {line_num}")
+                                findings.append(f"  Line {line_num}: {content.strip()}")
+                    
+                    # Start new file
                     current_file = line.replace('FILE: ', '').strip()
-                elif cmd in line and '=' not in line:  # Found the command
-                    findings.append(f"Found '{cmd}' in {current_file}")
+                    file_lines = []
+                    in_file = False
+                elif '=' * 80 in line:
+                    in_file = not in_file
+                elif in_file and current_file:
+                    file_lines.append(line)
+            
+            # Process last file
+            if current_file and file_lines:
+                for line_num, content in enumerate(file_lines, 1):
+                    if cmd in content and cmd not in current_file:
+                        findings.append(f"**FOUND ERROR**: '{cmd}' in file '{current_file}' at line {line_num}")
+                        findings.append(f"  Line {line_num}: {content.strip()}")
         
         if findings:
-            return "\n=== AUTOMATED ERROR LOCATION FINDINGS ===\n" + "\n".join(findings) + "\n\n"
+            return "\n=== AUTOMATED ERROR LOCATION FINDINGS ===\n" + "\n".join(findings) + "\n" + "="*80 + "\n\n"
         return ""
 
     def analyze_failure(self, codebase_context: str, log_content: str) -> str:
