@@ -23,6 +23,7 @@ def chat_with_model(model: str, messages: list, chat_id: int):
 
     # ---------- DEFAULT SYSTEM PROMPT ----------
     system_prompt = """
+You are DeepSeek-V3, a large language model created by DeepSeek Company.
 You are a helpful, conversational AI assistant.
 
 You can chat naturally with the user and remember things mentioned earlier
@@ -57,6 +58,7 @@ clearly say that no document has been uploaded yet.
     # ---------- DOCUMENT-AWARE PROMPT ----------
     if document_text.strip():
         system_prompt = f"""
+You are DeepSeek-V3, a large language model created by DeepSeek Company.
 You are a helpful, conversational AI assistant.
 
 You can:
