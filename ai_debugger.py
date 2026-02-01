@@ -209,9 +209,12 @@ Your task is to perform deep root cause analysis and provide a structured report
 
 **IMPORTANT**: You MUST search the codebase files to find the exact location. Do not give generic advice - give specific file paths and line numbers!"""
 
+        # Preprocess: Find error locations automatically
+        error_findings = self.find_error_in_codebase(log_content, codebase_context)
+        
         prompt = f"""{system_instruction}
 
-{codebase_context}
+{error_findings}{codebase_context}
 
 === BUILD FAILURE LOGS ===
 {log_content}
