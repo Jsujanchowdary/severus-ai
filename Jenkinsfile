@@ -35,7 +35,6 @@ pipeline {
                     echo "📥 Adding Prometheus Helm repository..."
                     $HELM_BIN repo add prometheus-community https://prometheus-community.github.io/helm-charts
                     $HELM_BIN repo update
-                    gctujvydtu
                 '''
             }
         }
