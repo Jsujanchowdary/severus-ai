@@ -145,8 +145,9 @@ class GeminiAnalyzer:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
+        # Using gemini-1.5-flash for better rate limits on free tier
         self.model = genai.GenerativeModel(
-            model_name='gemini-2.0-flash', # Updated to latest fast model
+            model_name='gemini-1.5-flash',
             generation_config={
                 'temperature': 0.2,
                 'top_p': 0.95,
@@ -171,6 +172,7 @@ All pipeline stages completed successfully. No issues detected.
         """
         Send codebase and logs to Gemini for root cause analysis.
         Returns structured analysis report.
+        Includes retry logic for rate limit errors.
         """
         system_instruction = """You are a Root Cause Analysis AI specialized in debugging build failures.
 
@@ -213,14 +215,49 @@ Do NOT deviate from this format. Be precise, technical, and actionable."""
 
 Analyze the above and provide your structured report."""
 
-        try:
-            print("\n🤖 Sending data to Gemini for analysis...")
-            response = self.model.generate_content(prompt)
-            return response.text
-        except Exception as e:
-            error_msg = f"Error during Gemini analysis: {e}"
-            print(f"❌ {error_msg}")
-            return f"## Analysis Failed\n\n{error_msg}"
+        # Retry logic for rate limit errors
+        import time
+        max_retries = 3
+        retry_delay = 2  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                print(f"\n🤖 Sending data to Gemini for analysis (Attempt {attempt + 1}/{max_retries})...")
+                response = self.model.generate_content(prompt)
+                return response.text
+            except Exception as e:
+                error_msg = str(e)
+                
+                # Check if it's a rate limit error
+                if "429" in error_msg or "quota" in error_msg.lower():
+                    if attempt < max_retries - 1:
+                        wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                        print(f"⚠️  Rate limit hit. Retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        print(f"❌ Rate limit exceeded after {max_retries} attempts")
+                        return f"""## Analysis Failed - Rate Limit Exceeded
+
+**Error:** API quota exceeded. The Gemini API free tier has daily/minute limits.
+
+**What happened:**
+{error_msg}
+
+**Solutions:**
+1. Wait 24 hours for quota reset
+2. Use a different API key
+3. Upgrade to paid tier
+4. Check usage at: https://ai.dev/rate-limit
+
+**Temporary Analysis:**
+Based on the logs, the build failed. Please manually review the Jenkins console output for error details."""
+                else:
+                    # Non-rate-limit error
+                    print(f"❌ {error_msg}")
+                    return f"## Analysis Failed\n\n{error_msg}"
+        
+        return "## Analysis Failed\n\nUnexpected error during retry logic."
 
 
 class ReportGenerator:

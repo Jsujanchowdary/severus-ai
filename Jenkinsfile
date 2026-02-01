@@ -35,6 +35,7 @@ pipeline {
                     echo "📥 Adding Prometheus Helm repository..."
                     $HELM_BIN repo add prometheus-community https://prometheus-community.github.io/helm-charts
                     $HELM_BIN repo update
+                    gctujvydtu
                 '''
             }
         }
@@ -117,8 +118,6 @@ pipeline {
 
                     pip install --upgrade pip
                     pip install -r requirements.txt
-
-                    dcaefcwsevc
                 '''
             }
         }
