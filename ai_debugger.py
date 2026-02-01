@@ -73,9 +73,13 @@ def extract_runtime_error(log_text):
         r'line \d+: (\w+): command not found',
         r'(\w+): command not found',
         r'NameError: name \'(\w+)\' is not defined',
+        r'File ".*?", line \d+, in .*?\n\s+(\w+)', # Captures the failing line content
+        r'ImportError: No module named (\w+)',
+        r'ModuleNotFoundError: No module named \'(\w+)\'',
         r'No such file or directory.*?(\w+\.\w+)',
-        r'SyntaxError.*?(\w+)',
-        r'Exception.*?(\w+)',
+        r'SyntaxError:.*?(\w+)',
+        r'AttributeError:.*?object has no attribute \'(\w+)\'',
+        r'Exception: (.+)',
     ]
 
     for pattern in patterns:

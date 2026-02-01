@@ -329,6 +329,14 @@ pipeline {
                         echo "✅ Ingress reachable via Traefik"
                         '''
                     }
+                    post {
+                        failure {
+                            sh '''
+                                echo "❌ Ingress Test Failed. Fetching pod logs..."
+                                $KUBECTL_BIN logs -l app=severus-ai --all-containers=true --tail=100 || true
+                            '''
+                        }
+                    }
                 }
 
                 stage('Ollama Connectivity Test') {
