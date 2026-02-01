@@ -497,8 +497,9 @@ pipeline {
                 def logFile = "${WORKSPACE}/jenkins_console.log"
                 
                 
-                // Write build metadata instead of full log (rawBuild requires approval)
-                writeFile file: logFile, text: "Build ${BUILD_NUMBER}: ${status}\nAnalyzing codebase...\n"
+                // Capture full console log (now approved)
+                def consoleLog = currentBuild.rawBuild.getLog(10000).join('\n')
+                writeFile file: logFile, text: consoleLog
                 
                 // Run AI Debugger
                 sh """
