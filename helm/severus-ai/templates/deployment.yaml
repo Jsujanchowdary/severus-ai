@@ -33,6 +33,18 @@ spec:
               value: /app/data/metrics
             - name: PROMETHEUS_MULTIPROC_DIR
               value: /app/data/metrics
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8501
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8501
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
