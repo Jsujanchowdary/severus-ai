@@ -496,14 +496,9 @@ pipeline {
                 // Save Jenkins console log to file
                 def logFile = "${WORKSPACE}/jenkins_console.log"
                 
-                // Get logs safely
-                def consoleLog = ""
-                try {
-                    consoleLog = currentBuild.rawBuild.getLog(10000).join('\n')
-                } catch (Exception e) {
-                    consoleLog = "Could not retrieve logs: ${e.message}"
-                }
-                writeFile file: logFile, text: consoleLog
+                
+                // Write build metadata instead of full log (rawBuild requires approval)
+                writeFile file: logFile, text: "Build ${BUILD_NUMBER}: ${status}\nAnalyzing codebase...\n"
                 
                 // Run AI Debugger
                 sh """
