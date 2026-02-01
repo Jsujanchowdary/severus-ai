@@ -485,4 +485,49 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            script {
+                def status = currentBuild.currentResult == 'SUCCESS' ? 'success' : 'failure'
+                echo "🤖 Running AI Debugger (Status: ${status})..."
+                
+                // Save Jenkins console log to file
+                def logFile = "${WORKSPACE}/jenkins_console.log"
+                
+                // Get logs safely
+                def consoleLog = ""
+                try {
+                    consoleLog = currentBuild.rawBuild.getLog(10000).join('\n')
+                } catch (Exception e) {
+                    consoleLog = "Could not retrieve logs: ${e.message}"
+                }
+                writeFile file: logFile, text: consoleLog
+                
+                // Run AI Debugger
+                sh """
+                    set +e
+                    
+                    if [ ! -d "venv" ]; then
+                        $PYTHON_BIN -m venv venv
+                    fi
+                    . venv/bin/activate
+                    
+                    # Ensure dependencies are installed
+                    pip install -q -r requirements.txt || true
+                    
+                    # Run Debugger
+                    python3 ai_debugger.py \\
+                        --repo-path ${WORKSPACE} \\
+                        --log-path "${logFile}" \\
+                        --output-path report.txt \\
+                        --api-key "AIzaSyDq1LN5OvmRZdA94Nid-rMvay92Ly5f2ao" \\
+                        --status ${status}
+                """
+                
+                // Archive the report
+                archiveArtifacts artifacts: 'report.txt', allowEmptyArchive: true
+            }
+        }
+    }
 }

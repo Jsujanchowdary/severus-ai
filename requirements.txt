@@ -3,3 +3,5 @@ requests
 python-dotenv
 prometheus-client
 pypdf
+google-generativeai>=0.3.0
+gitpython>=3.1.40
