@@ -95,7 +95,7 @@ Uploaded document sources:
     # ---------- SEND TO OLLAMA ----------
     start_time = time.time()
     try:
-        logger.info(f"Sending request to Ollama @ {OLLAMA_BASE_URL}")
+        logger.info(f"Sending request to Ollama @ {OLLAMA_BASE_URL} | Model: {model}")
 
         response = requests.post(
             f"{OLLAMA_BASE_URL}/api/chat",

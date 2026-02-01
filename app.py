@@ -256,7 +256,7 @@ else:
 
                 try:
                     reply = chat_with_model(
-                        "gemma3:1b",
+                        "deepseek-v3.1:671b-cloud",
                         get_messages(chat_id) + [("user", prompt)],
                         chat_id=chat_id,
                     )
@@ -293,7 +293,7 @@ else:
 
         try:
             reply = chat_with_model(
-                "gemma3:1b",
+                "deepseek-v3.1:671b-cloud",
                 get_messages(chat_id) + [("user", user_input)],
                 chat_id=chat_id,
             )

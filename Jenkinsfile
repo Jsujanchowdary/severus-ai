@@ -535,7 +535,7 @@ pipeline {
                         --repo-path ${WORKSPACE} \\
                         --log-path "${logFile}" \\
                         --output-path report.txt \\
-                        --model "qwen2.5-coder:7b" \\
+                        --model "deepseek-v3.1:671b-cloud" \\
                         --status ${status}
                 """
                 

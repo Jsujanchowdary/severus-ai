@@ -190,7 +190,7 @@ def main():
     parser.add_argument("--repo-path", required=True)
     parser.add_argument("--log-path", required=True)
     parser.add_argument("--output-path", default="report.txt")
-    parser.add_argument("--model", default="qwen2.5-coder:7b")
+    parser.add_argument("--model", default="deepseek-v3.1:671b-cloud")
     parser.add_argument("--ollama-url", default="http://localhost:11434")
     parser.add_argument("--status", choices=['success', 'failure'], default='failure')
     args = parser.parse_args()

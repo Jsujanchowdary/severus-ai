@@ -1,0 +1,3 @@
+Application: ✅ Running at http://severus-ai.local
+Grafana: ✅ Running at http://grafana.local
+Prometheus: ✅ Running at http://prometheus.local (all targets healthy)
