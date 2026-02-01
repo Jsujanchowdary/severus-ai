@@ -5,6 +5,7 @@ Severus AI - Personal AI Assistant with Prometheus Monitoring
 import metrics
 import os
 import threading
+# Fixed: removed invalid code
 
 # Start background thread for uptime (multiprocess support)
 def uptime_updater():
