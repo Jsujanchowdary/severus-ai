@@ -325,7 +325,7 @@ pipeline {
 
                         curl --retry 5 --retry-delay 2 --fail -s \
                             -H "Host: severus-ai.local" \
-                            http://127.0.0.1:8081 | grep -q "Severus AI"
+                            http://127.0.0.1:8081 | grep -q "Streamlit"
 
                         echo "✅ Ingress reachable via Traefik"
                         '''

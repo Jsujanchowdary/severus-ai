@@ -130,7 +130,7 @@ EOF
 )
 
       (
-        if curl -s --max-time 10 -X GET "$TARGET" | grep -q "Severus AI"; then
+        if curl -s --max-time 10 -X GET "$TARGET" | grep -q "Streamlit"; then
           increment "$SUCCESS_FILE"
         else
           increment "$FAILURE_FILE"
