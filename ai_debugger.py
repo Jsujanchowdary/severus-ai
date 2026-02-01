@@ -33,11 +33,19 @@ class CodebaseIngester:
         self.repo_path = Path(repo_path).resolve()
         self.index = []
 
-    def ingest(self):
+    def ingest(self, exclude_files=None):
+        if exclude_files is None:
+            exclude_files = set()
+        
         for root, dirs, files in os.walk(self.repo_path):
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
             for file in files:
                 path = Path(root) / file
+                
+                # Exclude the report output file and other non-source files
+                if file in exclude_files or file == "report.txt" or file.endswith(".log"):
+                    continue
+                    
                 if path.suffix.lower() not in SUPPORTED_EXTENSIONS and file != "Jenkinsfile":
                     continue
                 if path.stat().st_size > MAX_FILE_SIZE:
@@ -101,6 +109,16 @@ class OllamaAnalyzer:
         self.model = model
 
     def analyze(self, error_token, findings, log_content):
+        if not findings:
+            return "AI analysis failed: No codebase findings provided."
+
+        # Prioritize source files (non-txt, non-md) for the main error location
+        primary_finding = findings[0]
+        for f in findings:
+            if not f['file'].endswith(('.txt', '.md')):
+                primary_finding = f
+                break
+
         context = "\n".join(
             f"{f['file']}:{f['line']} -> {f['code']}"
             for f in findings
@@ -121,8 +139,8 @@ Respond in this EXACT format:
 ## Build Status: FAILURE ❌
 
 ## Error Location
-**File:** {findings[0]['file'] if findings else 'Unknown'}
-**Line Number:** {findings[0]['line'] if findings else 'Unknown'}
+**File:** {primary_finding['file']}
+**Line Number:** {primary_finding['line']}
 **Error String:** {error_token}
 
 ## Issue Analysis
@@ -130,7 +148,7 @@ Respond in this EXACT format:
 
 ## Proposed Solution
 ```diff
-- {findings[0]['code'] if findings else 'old line'}
+- {primary_finding['code']}
 + [corrected line]
 ```
 
@@ -191,7 +209,7 @@ All pipeline stages completed successfully. No issues detected.
     # Failure mode
     print("\n📂 Step 1: Ingesting codebase...")
     ingester = CodebaseIngester(args.repo_path)
-    ingester.ingest()
+    ingester.ingest(exclude_files={Path(args.output_path).name})
 
     print("\n📋 Step 2: Parsing Jenkins logs...")
     log_content = Path(args.log_path).read_text(errors="ignore")
