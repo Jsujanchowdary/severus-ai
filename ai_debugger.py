@@ -153,15 +153,24 @@ class GeminiAnalyzer:
     def __init__(self, api_key: str):
         self.api_key = api_key
         
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        
         if NEW_API:
             # New google-genai package
-            self.client = genai.Client(api_key=api_key)
-            self.model_name = 'gemini-1.5-flash'  # Use stable flash model
-        else:
+            try:
+                self.client = genai.Client(api_key=api_key)
+                self.model_name = 'gemini-1.5-flash'
+            except Exception as e:
+                print(f"⚠️ Error initializing new GenAI client: {e}")
+                global NEW_API
+                NEW_API = False
+        
+        if not NEW_API:
             # Old deprecated package
             genai.configure(api_key=api_key)
             self.model = genai.GenerativeModel(
-                model_name='gemini-1.5-flash',  # Stable model slug
+                model_name='gemini-1.5-flash', # Slug usually works here
                 generation_config={
                     'temperature': 0.2,
                     'top_p': 0.95,
@@ -240,11 +249,21 @@ Analyze the above and provide your structured report."""
                 
                 if NEW_API:
                     # New API
-                    response = self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=prompt
-                    )
-                    return response.text
+                    try:
+                        response = self.client.models.generate_content(
+                            model=self.model_name,
+                            contents=prompt
+                        )
+                        return response.text
+                    except Exception as e:
+                        if "404" in str(e):
+                            print("🔍 404 detected. Listing available models...")
+                            try:
+                                for m in self.client.models.list():
+                                    print(f"  - {m.name}")
+                            except:
+                                pass
+                        raise e
                 else:
                     # Old API
                     response = self.model.generate_content(prompt)
