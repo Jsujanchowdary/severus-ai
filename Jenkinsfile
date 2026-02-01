@@ -517,7 +517,7 @@ pipeline {
                         --repo-path ${WORKSPACE} \\
                         --log-path "${logFile}" \\
                         --output-path report.txt \\
-                        --model "qwen2.5-coder:14b" \\
+                        --model "qwen2.5-coder:7b" \\
                         --status ${status}
                 """
                 

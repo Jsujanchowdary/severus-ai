@@ -144,7 +144,7 @@ class LogParser:
 class OllamaAnalyzer:
     """Handles interaction with local Ollama API for root cause analysis."""
     
-    def __init__(self, model_name: str = "qwen2.5-coder:14b", ollama_url: str = "http://localhost:11434"):
+    def __init__(self, model_name: str = "qwen2.5-coder:7b", ollama_url: str = "http://localhost:11434"):
         self.model_name = model_name
         self.ollama_url = ollama_url
         self.api_endpoint = f"{ollama_url}/api/generate"
@@ -315,7 +315,7 @@ def main():
     parser.add_argument('--repo-path', required=True, help='Path to repo root')
     parser.add_argument('--log-path', required=True, help='Path to Jenkins log')
     parser.add_argument('--output-path', default='report.txt', help='Output path')
-    parser.add_argument('--model', default='qwen2.5-coder:14b', help='Ollama model name')
+    parser.add_argument('--model', default='qwen2.5-coder:7b', help='Ollama model name')
     parser.add_argument('--ollama-url', default='http://localhost:11434', help='Ollama API URL')
     parser.add_argument('--status', choices=['success', 'failure'], default='failure',
                         help='Build status (determines analysis mode)')
