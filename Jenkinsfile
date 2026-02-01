@@ -43,7 +43,6 @@ pipeline {
             steps {
                 sh '''
                     set -euo pipefail
-                    hgctjkb
                     echo "📊 Deploying Prometheus and Grafana stack..."
                     # Cleanup potentially conflicting webhooks from previous runs
                     $KUBECTL_BIN delete mutatingwebhookconfiguration kube-prometheus-stack-admission --ignore-not-found=true
