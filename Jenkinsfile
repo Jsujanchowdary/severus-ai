@@ -68,7 +68,6 @@ pipeline {
                 sh '''
                     set -euo pipefail
                     echo "🔧 Configuring application metrics discovery..."
-                    wefwef2e
                     
                     # Ensure ServiceMonitor is correctly labeled for Prometheus discovery
                     $KUBECTL_BIN label servicemonitor severus-ai release=kube-prometheus-stack --overwrite || echo "⚠️ ServiceMonitor not found yet"
