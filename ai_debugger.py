@@ -147,7 +147,7 @@ class GeminiAnalyzer:
         genai.configure(api_key=api_key)
         # Using gemini-1.5-flash for better rate limits on free tier
         self.model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
+            model_name='gemini-1.5-flash-latest',  # Correct model identifier
             generation_config={
                 'temperature': 0.2,
                 'top_p': 0.95,
