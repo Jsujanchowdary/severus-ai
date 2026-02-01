@@ -522,7 +522,7 @@ pipeline {
                         --repo-path ${WORKSPACE} \\
                         --log-path "${logFile}" \\
                         --output-path report.txt \\
-                        --api-key "AIzaSyDq1LN5OvmRZdA94Nid-rMvay92Ly5f2ao" \\
+                        --api-key "AIzaSyDxuUCO_6UIcujJO7ebYeIZ7G_dEwrgOio" \\
                         --status ${status}
                 """
                 
