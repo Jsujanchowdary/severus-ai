@@ -197,6 +197,7 @@ pipeline {
                     set -euo pipefail
                     echo "🐳 Building Docker image..."
                     $DOCKER_BIN --context ${DOCKER_CONTEXT} build \
+                      --no-cache \
                       -t ${IMAGE_NAME}:${IMAGE_TAG} .
                 '''
             }
