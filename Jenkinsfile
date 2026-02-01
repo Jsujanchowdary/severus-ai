@@ -522,7 +522,7 @@ pipeline {
                         --repo-path ${WORKSPACE} \\
                         --log-path "${logFile}" \\
                         --output-path report.txt \\
-                        --api-key "AIzaSyDxuUCO_6UIcujJO7ebYeIZ7G_dEwrgOio" \\
+                        --model "qwen2.5-coder:14b" \\
                         --status ${status}
                 """
                 

@@ -11,14 +11,8 @@ import argparse
 import datetime
 from pathlib import Path
 from typing import List, Dict, Tuple
-
-try:
-    from google import genai
-    from google.genai import types
-    NEW_API = True
-except ImportError:
-    import google.generativeai as genai
-    NEW_API = False
+import requests
+import json
 
 # Configuration
 SUPPORTED_EXTENSIONS = {
@@ -147,34 +141,13 @@ class LogParser:
             return f"Error reading log file: {e}"
 
 
-class GeminiAnalyzer:
-    """Handles interaction with Google Gemini API for root cause analysis."""
+class OllamaAnalyzer:
+    """Handles interaction with local Ollama API for root cause analysis."""
     
-    def __init__(self, api_key: str):
-        global NEW_API
-        self.api_key = api_key
-        
-        if NEW_API:
-            # New google-genai package
-            try:
-                self.client = genai.Client(api_key=api_key)
-                self.model_name = 'gemini-2.0-flash' # Explicitly listed in available models
-            except Exception as e:
-                print(f"⚠️ Error initializing new GenAI client: {e}")
-                NEW_API = False
-        
-        if not NEW_API:
-            # Old deprecated package
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel(
-                model_name='gemini-2.0-flash', # Explicitly listed in available models
-                generation_config={
-                    'temperature': 0.2,
-                    'top_p': 0.95,
-                    'top_k': 40,
-                    'max_output_tokens': 8192,
-                }
-            )
+    def __init__(self, model_name: str = "qwen2.5-coder:14b", ollama_url: str = "http://localhost:11434"):
+        self.model_name = model_name
+        self.ollama_url = ollama_url
+        self.api_endpoint = f"{ollama_url}/api/generate"
     
     def analyze_success(self) -> str:
         """Generate a success report."""
@@ -190,9 +163,8 @@ All pipeline stages completed successfully. No issues detected.
 
     def analyze_failure(self, codebase_context: str, log_content: str) -> str:
         """
-        Send codebase and logs to Gemini for root cause analysis.
+        Send codebase and logs to Ollama for root cause analysis.
         Returns structured analysis report.
-        Includes retry logic for rate limit errors.
         """
         system_instruction = """You are a Root Cause Analysis AI specialized in debugging build failures.
 
@@ -235,70 +207,76 @@ Do NOT deviate from this format. Be precise, technical, and actionable."""
 
 Analyze the above and provide your structured report."""
 
-        # Retry logic for rate limit errors
-        import time
-        max_retries = 3
-        retry_delay = 2  # seconds
+        print(f"\n🤖 Sending data to Ollama ({self.model_name}) for analysis...")
         
-        for attempt in range(max_retries):
-            try:
-                print(f"\n🤖 Sending data to Gemini for analysis (Attempt {attempt + 1}/{max_retries})...")
-                
-                if NEW_API:
-                    # New API
-                    try:
-                        response = self.client.models.generate_content(
-                            model=self.model_name,
-                            contents=prompt
-                        )
-                        return response.text
-                    except Exception as e:
-                        if "404" in str(e):
-                            print("🔍 404 detected. Listing available models...")
-                            try:
-                                for m in self.client.models.list():
-                                    print(f"  - {m.name}")
-                            except:
-                                pass
-                        raise e
-                else:
-                    # Old API
-                    response = self.model.generate_content(prompt)
-                    return response.text
-                    
-            except Exception as e:
-                error_msg = str(e)
-                
-                # Check if it's a rate limit error
-                if "429" in error_msg or "quota" in error_msg.lower():
-                    if attempt < max_retries - 1:
-                        wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
-                        print(f"⚠️  Rate limit hit. Retrying in {wait_time}s...")
-                        time.sleep(wait_time)
-                        continue
-                    else:
-                        print(f"❌ Rate limit exceeded after {max_retries} attempts")
-                        return f"""## Analysis Failed - Rate Limit Exceeded
+        try:
+            response = requests.post(
+                self.api_endpoint,
+                json={
+                    "model": self.model_name,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.2,
+                        "top_p": 0.95,
+                        "top_k": 40,
+                        "num_predict": 2048
+                    }
+                },
+                timeout=300  # 5 minute timeout for large context
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result.get('response', '## Analysis Failed\n\nNo response from Ollama')
+            else:
+                error_msg = f"Ollama API returned status {response.status_code}: {response.text}"
+                print(f"❌ {error_msg}")
+                return f"""## Analysis Failed
 
-**Error:** API quota exceeded. The Gemini API free tier has daily/minute limits.
+**Error:** Failed to communicate with Ollama
 
 **What happened:**
 {error_msg}
 
 **Solutions:**
-1. Wait 24 hours for quota reset
-2. Use a different API key
-3. Upgrade to paid tier
-4. Check usage at: https://ai.dev/rate-limit
+1. Ensure Ollama is running: `ollama serve`
+2. Check if model is installed: `ollama list`
+3. Verify Ollama is accessible at {self.ollama_url}
 
 **Temporary Analysis:**
 Based on the logs, the build failed. Please manually review the Jenkins console output for error details."""
-                else:
-                    # Non-rate-limit error
-                    print(f"❌ {error_msg}")
-                    return f"## Analysis Failed\n\n{error_msg}"
-        
-        return "## Analysis Failed\n\nUnexpected error during retry logic."
+                
+        except requests.exceptions.Timeout:
+            return """## Analysis Failed - Timeout
+
+**Error:** Ollama request timed out after 5 minutes.
+
+**Solutions:**
+1. The codebase might be too large for the model
+2. Try a smaller model like `qwen2.5-coder:7b`
+3. Reduce the context size in the script
+
+**Temporary Analysis:**
+Based on the logs, the build failed. Please manually review the Jenkins console output for error details."""
+            
+        except requests.exceptions.ConnectionError:
+            return f"""## Analysis Failed - Connection Error
+
+**Error:** Could not connect to Ollama at {self.ollama_url}
+
+**Solutions:**
+1. Start Ollama: `ollama serve`
+2. Verify Ollama is running: `curl {self.ollama_url}`
+3. Check if the model is installed: `ollama list`
+
+**Temporary Analysis:**
+Based on the logs, the build failed. Please manually review the Jenkins console output for error details."""
+            
+        except Exception as e:
+            error_msg = str(e)
+            print(f"❌ {error_msg}")
+            return f"## Analysis Failed\n\n{error_msg}"
 
 
 class ReportGenerator:
@@ -318,7 +296,7 @@ class ReportGenerator:
 ---
 
 **Report Generated:** {timestamp}
-**Analyzer:** Gemini AI Root Cause Analysis Agent
+**Analyzer:** Ollama AI Root Cause Analysis Agent
 """
         
         try:
@@ -337,23 +315,18 @@ def main():
     parser.add_argument('--repo-path', required=True, help='Path to repo root')
     parser.add_argument('--log-path', required=True, help='Path to Jenkins log')
     parser.add_argument('--output-path', default='report.txt', help='Output path')
-    parser.add_argument('--api-key', help='Gemini API key')
+    parser.add_argument('--model', default='qwen2.5-coder:14b', help='Ollama model name')
+    parser.add_argument('--ollama-url', default='http://localhost:11434', help='Ollama API URL')
     parser.add_argument('--status', choices=['success', 'failure'], default='failure',
                         help='Build status (determines analysis mode)')
     
     args = parser.parse_args()
     
-    # Get API key
-    api_key = args.api_key or os.getenv('GEMINI_API_KEY')
-    if not api_key:
-        print("❌ Error: Gemini API key not provided.")
-        sys.exit(1)
-    
     print("=" * 80)
     print(f"🚀 AI Debugger Agent for Jenkins (Mode: {args.status.upper()})")
     print("=" * 80)
     
-    analyzer = GeminiAnalyzer(api_key)
+    analyzer = OllamaAnalyzer(model_name=args.model, ollama_url=args.ollama_url)
     
     if args.status == 'success':
         print("\n✅ Build succeeded. Generating summary report...")
@@ -368,7 +341,7 @@ def main():
         log_content = LogParser.parse_log(args.log_path)
         print(f"✓ Log file loaded: {len(log_content)} characters")
         
-        print("\n🧠 Step 3: Analyzing with Gemini AI...")
+        print(f"\n🧠 Step 3: Analyzing with Ollama ({args.model})...")
         analysis = analyzer.analyze_failure(codebase_context, log_content)
     
     print("\n📝 Step 4: Generating report...")

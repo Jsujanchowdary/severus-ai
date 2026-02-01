@@ -3,5 +3,4 @@ requests
 python-dotenv
 prometheus-client
 pypdf
-google-genai>=0.1.0
 gitpython>=3.1.40
