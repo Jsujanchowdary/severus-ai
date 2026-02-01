@@ -11,7 +11,14 @@ import argparse
 import datetime
 from pathlib import Path
 from typing import List, Dict, Tuple
-import google.generativeai as genai
+
+try:
+    from google import genai
+    from google.genai import types
+    NEW_API = True
+except ImportError:
+    import google.generativeai as genai
+    NEW_API = False
 
 # Configuration
 SUPPORTED_EXTENSIONS = {
@@ -144,17 +151,24 @@ class GeminiAnalyzer:
     """Handles interaction with Google Gemini API for root cause analysis."""
     
     def __init__(self, api_key: str):
-        genai.configure(api_key=api_key)
-        # Using gemini-pro (compatible with deprecated google.generativeai package)
-        self.model = genai.GenerativeModel(
-            model_name='gemini-pro',  # Stable model for v1beta API
-            generation_config={
-                'temperature': 0.2,
-                'top_p': 0.95,
-                'top_k': 40,
-                'max_output_tokens': 8192,
-            }
-        )
+        self.api_key = api_key
+        
+        if NEW_API:
+            # New google-genai package
+            self.client = genai.Client(api_key=api_key)
+            self.model_name = 'gemini-2.0-flash-exp'
+        else:
+            # Old deprecated package
+            genai.configure(api_key=api_key)
+            self.model = genai.GenerativeModel(
+                model_name='models/gemini-1.5-pro',  # Full path for old API
+                generation_config={
+                    'temperature': 0.2,
+                    'top_p': 0.95,
+                    'top_k': 40,
+                    'max_output_tokens': 8192,
+                }
+            )
     
     def analyze_success(self) -> str:
         """Generate a success report."""
@@ -223,8 +237,19 @@ Analyze the above and provide your structured report."""
         for attempt in range(max_retries):
             try:
                 print(f"\n🤖 Sending data to Gemini for analysis (Attempt {attempt + 1}/{max_retries})...")
-                response = self.model.generate_content(prompt)
-                return response.text
+                
+                if NEW_API:
+                    # New API
+                    response = self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt
+                    )
+                    return response.text
+                else:
+                    # Old API
+                    response = self.model.generate_content(prompt)
+                    return response.text
+                    
             except Exception as e:
                 error_msg = str(e)
                 
