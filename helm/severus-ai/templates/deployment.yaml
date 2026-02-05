@@ -51,12 +51,24 @@ spec:
         - name: severus-ai
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "🚀 Starting Severus AI on internal port 8502..."
+              # Create metrics dir
+              export prometheus_multiproc_dir=/app/data/metrics
+              mkdir -p $prometheus_multiproc_dir
+              rm -rf $prometheus_multiproc_dir/*
+              # Run streamlit with port override
+              streamlit run app.py \
+                --server.address=0.0.0.0 \
+                --server.port=8502 \
+                --server.enableCORS=false \
+                --server.enableXsrfProtection=false \
+                --server.maxUploadSize=200
           ports:
             - name: streamlit
               containerPort: 8502
-              protocol: TCP
-            - name: metrics
-              containerPort: 8000
               protocol: TCP
           env:
             - name: OLLAMA_BASE_URL
