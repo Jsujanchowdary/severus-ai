@@ -297,6 +297,6 @@ kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download
 
 ## References
 
-- [Certificate Documentation](documentation/CERTIFICATES.md)
+- [Security Implementation Guide](documentation/SECURITY.md)
 - [cert-manager Documentation](https://cert-manager.io/docs/)
 - [Helm Chart Configuration](helm/severus-ai/values.yaml)

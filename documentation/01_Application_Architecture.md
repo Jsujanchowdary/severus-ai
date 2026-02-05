@@ -24,21 +24,23 @@ Severus AI is a cloud-native personal AI assistant built with Streamlit and inte
 
 ```mermaid
 graph TB
-    subgraph "User Interface"
-        UI[Streamlit Web UI]
+subgraph "User Interface"
+        UI[Web Browser / Ingress]
     end
     
     subgraph "Application Pod"
+        direction TB
+        Nginx[nginx Sidecar]
         App[Severus AI Application]
         MetricsExp[Metrics Exporter]
         
+        Nginx -->|Proxy :8502| App
         App -->|Exposes| MetricsExp
     end
     
     subgraph "Backend Services"
         Ollama[Ollama LLM Service]
         DB[(SQLite Database)]
-        FS[File Storage]
     end
     
     subgraph "Monitoring Stack"
@@ -48,16 +50,17 @@ graph TB
         Prom -->|Queries| Grafana
     end
     
-    UI -->|HTTP/WebSocket| App
+    UI -->|HTTPS :443| Nginx
+    Nginx -->|mTLS :8501| App
     App -->|API Calls| Ollama
     App -->|Read/Write| DB
-    App -->|Store Files| FS
     MetricsExp -->|Scrape| Prom
     
-    style App fill:#4CAF50
-    style MetricsExp fill:#FF9800
-    style Prom fill:#E91E63
-    style Grafana fill:#F44336
+    style Nginx fill:#009688,color:#fff
+    style App fill:#4CAF50,color:#fff
+    style MetricsExp fill:#FF9800,color:#fff
+    style Prom fill:#E91E63,color:#fff
+    style Grafana fill:#F44336,color:#fff
 ```
 
 ## Component Breakdown
@@ -135,15 +138,21 @@ graph LR
     Export -->|Scraped by| Prometheus[Prometheus Server]
 ```
 
-### 3. Metrics Exporter (metrics_exporter.py)
+### 3. nginx Sidecar (nginx.conf)
+
+A high-performance security proxy running as a sidecar container in the same pod.
+
+**Responsibilities:**
+- **TLS Termination**: Handles external HTTPS traffic from the Ingress.
+- **mTLS Enforcement**: Strictly validates client certificates for internal traffic.
+- **Dual-Port Routing**:
+  - **Port 8501**: Secure mTLS endpoint for pod-to-pod communication.
+  - **Port 8080**: Plain HTTP endpoint for browser/Ingress access.
+- **Internal Proxying**: Forwards all authorized traffic to Streamlit on **localhost:8502**.
+
+### 4. Metrics Exporter (metrics_exporter.py)
 
 Standalone HTTP server exposing Prometheus metrics on port 8000.
-
-**Features:**
-- Multi-process metric aggregation
-- Prometheus-compatible endpoint
-- Health check endpoint
-- Non-blocking concurrent requests
 
 ### 4. Authentication System (auth.py)
 

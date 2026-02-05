@@ -10,13 +10,14 @@ This directory contains comprehensive technical documentation for the **Severus 
 
 | Document | Description | Key Topics |
 |----------|-------------|------------|
-| **[01_Application_Architecture.md](01_Application_Architecture.md)** | Core Streamlit application design | System architecture, component breakdown, metrics system, data flow |
-| **[02_CICD_Pipeline.md](02_CICD_Pipeline.md)** | Jenkins CI/CD pipeline automation | Pipeline stages, parallel testing, K3s multi-version validation, security scanning |
-| **[03_Performance_Evaluation.md](03_Performance_Evaluation.md)** | **NOVELTY #1**: Pre-deployment stress testing | Stress pod design, request generation, resource monitoring, preventing request loss |
-| **[04_AI_Debugger.md](04_AI_Debugger.md)** | **NOVELTY #2**: AI-powered automated debugging | Deterministic error detection, intelligent codebase search, Ollama AI analysis |
-| **[05_Monitoring_Stack.md](05_Monitoring_Stack.md)** | Prometheus and Grafana observability | Metrics collection, PromQL formulas, dashboard configuration, ServiceMonitor |
-| **[06_Helm_Configuration.md](06_Helm_Configuration.md)** | Kubernetes deployment via Helm | Deployment specs, service configuration, RBAC, health probes |
-| **[07_Networking_Architecture.md](07_Networking_Architecture.md)** | Network topology and configuration | Kubernetes networking, Ingress routing, proxy setup, required services |
+| **[01_Application_Architecture.md](01_Application_Architecture.md)** | Core Streamlit application design | System architecture, Nginx sidecar, metrics, data flow |
+| **[02_CICD_Pipeline.md](02_CICD_Pipeline.md)** | Jenkins CI/CD pipeline automation | Pipeline stages, parallel testing, multi-version validation |
+| **[03_Performance_Evaluation.md](03_Performance_Evaluation.md)** | **NOVELTY #1**: Pre-deployment stress testing | Stress pod, request generation, resource monitoring |
+| **[04_AI_Debugger.md](04_AI_Debugger.md)** | **NOVELTY #2**: AI-powered automated debugging | Error extraction, codebase search, LLM analysis |
+| **[05_Monitoring_Stack.md](05_Monitoring_Stack.md)** | Prometheus and Grafana observability | Metrics collection, PromQL, Grafana configuration |
+| **[06_Helm_Configuration.md](06_Helm_Configuration.md)** | Kubernetes deployment via Helm | Deployment specs, service configuration, RBAC |
+| **[07_Networking_Architecture.md](07_Networking_Architecture.md)** | Network topology and configuration | Kubernetes networking, Ingress, mTLS connectivity |
+| **[SECURITY.md](SECURITY.md)** | Security implementation details | mTLS, HTTPS, sidecar logic, cert-manager |
 
 ---
 

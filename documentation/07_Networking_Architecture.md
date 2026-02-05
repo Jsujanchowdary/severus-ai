@@ -20,58 +20,44 @@ The Severus AI networking architecture leverages Kubernetes networking primitive
 
 ## Network Topology
 
-```mermaid
-graph TB
-    subgraph "External Access"
+subgraph "External Access"
         Browser[Web Browser]
         DevMachine[Developer Machine]
     end
     
     subgraph "Ingress Layer"
-        Traefik[Traefik Ingress Controller<br/>:80]
+        Traefik[Traefik Ingress Controller<br/>:80/HTTP, :443/HTTPS]
     end
     
     subgraph "Service Layer"
-        AppSvc[severus-ai Service<br/>ClusterIP :8501, :8000]
+        AppSvc[severus-ai Service<br/>ClusterIP :8080, :8501, :8000]
         GrafanaSvc[Grafana Service<br/>ClusterIP :80]
-        PromSvc[Prometheus Service<br/>ClusterIP :9090]
     end
     
     subgraph "Pod Layer"
-        AppPod1[App Pod 1<br/>:8501 :8000]
-        AppPod2[App Pod 2<br/>:8501 :8000]
+        subgraph "Application Pod"
+            Nginx[nginx Sidecar]
+            App[Severus AI App]
+            
+            Nginx -->|localhost:8502| App
+        end
         GrafanaPod[Grafana Pod<br/>:3000]
-        PromPod[Prometheus Pod<br/>:9090]
     end
     
-    subgraph "External Services"
-        Ollama[Ollama LLM<br/>host.docker.internal:11434]
-    end
+    Browser -->|https://severus-ai.local| Traefik
+    DevMachine -->|http://severus-ai.local| Traefik
     
-    Browser -->|http://severus-ai.local| Traefik
-    Browser -->|http://grafana.local| Traefik
-    Browser -->|http://prometheus.local| Traefik
+    Traefik -->|Route :443 -> :8080| AppSvc
+    AppSvc -->|Load Balance| Nginx
     
-    Traefik -->|Route by Host Header| AppSvc
-    Traefik -->|Route by Host Header| GrafanaSvc
-    Traefik -->|Route by Host Header| PromSvc
+    DevMachine -.->|mTLS :8501| AppSvc
     
-    AppSvc -->|Load Balance| AppPod1
-    AppSvc -->|Load Balance| AppPod2
-    GrafanaSvc --> GrafanaPod
-    PromSvc --> PromPod
+    Nginx -.->|API Calls| Ollama[Ollama LLM]
     
-    AppPod1 -.->|API Calls| Ollama
-    AppPod2 -.->|API Calls| Ollama
-    
-    PromPod -->|Scrape :8000/metrics| AppPod1
-    PromPod -->|Scrape :8000/metrics| AppPod2
-    
-    style Traefik fill:#4CAF50
-    style AppSvc fill:#2196F3
-    style AppPod1 fill:#FF9800
-    style AppPod2 fill:#FF9800
-```
+    style Traefik fill:#4CAF50,color:#fff
+    style Nginx fill:#009688,color:#fff
+    style AppSvc fill:#2196F3,color:#fff
+    style App fill:#4CAF50,color:#fff
 
 ---
 
@@ -99,8 +85,9 @@ prometheus-xxx-0:              10.42.0.68
 **ClusterIP Services:**
 ```bash
 # Service DNS names (internal cluster only)
-severus-ai.default.svc.cluster.local:8501
-severus-ai.default.svc.cluster.local:8000
+severus-ai.default.svc.cluster.local:8080 (Public HTTP)
+severus-ai.default.svc.cluster.local:8501 (Secure mTLS)
+severus-ai.default.svc.cluster.local:8000 (Metrics)
 kube-prometheus-stack-grafana.default.svc.cluster.local:80
 kube-prometheus-stack-prometheus.default.svc.cluster.local:9090
 ```
@@ -408,12 +395,14 @@ kubectl port-forward svc/severus-ai 8501:8501
 
 ## Network Security Considerations
 
-### Current Setup (Development)
+### Current Setup (Production Ready)
 
-- ❌ No TLS/HTTPS
-- ❌ No network policies (all pods can communicate)
-- ❌ No authentication on Prometheus/metrics endpoints
-- ❌ Traefik uses HTTP only
+- ✅ **Full TLS/HTTPS**: External browser access is secured.
+- ✅ **Mutual TLS (mTLS)**: Internal service communication is encrypted and authenticated.
+- ✅ **Dual-Port Strategy**: Clear isolation between public HTTP and private mTLS traffic.
+- ✅ **Automated Cert Management**: All certificates managed by `cert-manager`.
+- ❌ No network policies (all pods can communicate) - *Recommended next step*
+- ❌ No authentication on Prometheus/metrics endpoints - *Recommended next step*
 
 ### Production Recommendations
 
