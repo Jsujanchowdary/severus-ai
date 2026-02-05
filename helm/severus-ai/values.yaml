@@ -105,7 +105,7 @@ certificates:
     image: nginx:1.25-alpine
     # on: require valid client certificate (strict)
     # optional: allow requests without cert but log them (permissive)
-    verifyClient: optional
+    verifyClient: "on"
   
   verification:
     # strict: reject requests without valid certificate
