@@ -1,0 +1,98 @@
+{{- if .Values.certificates.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "severus-ai.fullname" . }}-nginx-config
+  labels:
+    {{- include "severus-ai.labels" . | nindent 4 }}
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        # Logging
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log info;
+
+        # Upstream to Streamlit (running on localhost:8502)
+        upstream streamlit {
+            server 127.0.0.1:8502;
+        }
+
+        # Server block 1: mTLS (Internal pod-to-pod communication)
+        # Port 8501 - Requires valid client certificate
+        server {
+            listen 8501 ssl;
+            server_name severus-ai severus-ai.default.svc.cluster.local;
+
+            # Server certificate (for TLS)
+            ssl_certificate /etc/certs/tls.crt;
+            ssl_certificate_key /etc/certs/tls.key;
+
+            # Client certificate validation
+            ssl_client_certificate /etc/certs/ca.crt;
+            ssl_verify_client {{ .Values.certificates.nginx.verifyClient }};
+            ssl_verify_depth 2;
+
+            # TLS settings
+            ssl_protocols TLSv1.2 TLSv1.3;
+            ssl_ciphers HIGH:!aNULL:!MD5;
+            ssl_prefer_server_ciphers on;
+
+            # Add client certificate info to headers (for logging/debugging)
+            proxy_set_header X-Client-Cert-DN $ssl_client_s_dn;
+            proxy_set_header X-Client-Cert-Verified $ssl_client_verify;
+
+            location / {
+                proxy_pass http://streamlit;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                
+                # WebSocket support
+                proxy_read_timeout 86400;
+            }
+
+            # Health check endpoint (no cert validation)
+            location /healthz {
+                access_log off;
+                return 200 "OK\n";
+                add_header Content-Type text/plain;
+            }
+        }
+
+        # Server block 2: Plain HTTP (External/Browser access)
+        # Port 8080 - No certificate validation required
+        server {
+            listen 8080;
+            server_name _;
+
+            location / {
+                proxy_pass http://streamlit;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                
+                # WebSocket support
+                proxy_read_timeout 86400;
+            }
+
+            # Health check endpoint
+            location /healthz {
+                access_log off;
+                return 200 "OK\n";
+                add_header Content-Type text/plain;
+            }
+        }
+    }
+{{- end }}

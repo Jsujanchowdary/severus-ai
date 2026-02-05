@@ -13,10 +13,21 @@ spec:
   selector:
     app: severus-ai
   ports:
-    - name: http
-      port: {{ .Values.service.port }}
+{{- if .Values.certificates.enabled }}
+    - name: https-mtls
+      port: 8501
       targetPort: 8501
       protocol: TCP
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+{{- else }}
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: 8502
+      protocol: TCP
+{{- end }}
     - name: metrics
       port: 8000
       targetPort: 8000

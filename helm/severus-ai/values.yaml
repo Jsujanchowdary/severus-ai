@@ -63,8 +63,10 @@ stress:
   
   args:
     # Target URL for stress testing
+    # Port 8501: HTTPS with mTLS validation (nginx sidecar)
+    # Port 8080: Plain HTTP (browser access)
     targets:
-      - http://severus-ai:8501
+      - https://severus-ai:8501
     
     # Load parameters - Increased for HPA scaling demo
     totalRequests: 2000
@@ -98,6 +100,12 @@ certificates:
   
   clientCert:
     secretName: stress-pod-tls
+  
+  nginx:
+    image: nginx:1.25-alpine
+    # on: require valid client certificate (strict)
+    # optional: allow requests without cert but log them (permissive)
+    verifyClient: optional
   
   verification:
     # strict: reject requests without valid certificate

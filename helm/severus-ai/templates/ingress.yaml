@@ -19,5 +19,9 @@ spec:
               service:
                 name: {{ include "severus-ai.fullname" . }}
                 port:
+{{- if .Values.certificates.enabled }}
+                  number: 8080
+{{- else }}
                   number: {{ .Values.service.port }}
+{{- end }}
 {{- end }}
