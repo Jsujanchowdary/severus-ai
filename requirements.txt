@@ -4,3 +4,4 @@ python-dotenv
 prometheus-client
 pypdf
 gitpython>=3.1.40
+cryptography

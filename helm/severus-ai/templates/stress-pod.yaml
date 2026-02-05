@@ -16,6 +16,15 @@ spec:
         - name: stress
           image: "{{ .Values.stress.image.repository }}:{{ .Values.stress.image.tag }}"
           imagePullPolicy: Always
+{{- if .Values.certificates.enabled }}
+          env:
+            - name: CLIENT_CERT_PATH
+              value: /etc/certs/tls.crt
+            - name: CLIENT_KEY_PATH
+              value: /etc/certs/tls.key
+            - name: CA_BUNDLE_PATH
+              value: /etc/certs/ca.crt
+{{- end }}
 
           command: ["/bin/bash", "-c"]
           args:
@@ -30,5 +39,15 @@ spec:
                 -s {{ .Values.stress.args.sleepSeconds }} \
 {{- range .Values.stress.args.podLabels }}
                 -p {{ . }} \
+{{- end }}
+{{- if .Values.certificates.enabled }}
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/certs
+              readOnly: true
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: {{ .Values.certificates.clientCert.secretName }}
 {{- end }}
 {{- end }}

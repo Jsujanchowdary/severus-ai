@@ -60,11 +60,42 @@ increment() {
 }
 
 # -----------------------------
+# Certificate Configuration
+# -----------------------------
+CLIENT_CERT="${CLIENT_CERT_PATH:-/etc/certs/tls.crt}"
+CLIENT_KEY="${CLIENT_KEY_PATH:-/etc/certs/tls.key}"
+CA_BUNDLE="${CA_BUNDLE_PATH:-/etc/certs/ca.crt}"
+
+# Check if certificates exist
+CERT_ENABLED=false
+if [[ -f "$CLIENT_CERT" && -f "$CLIENT_KEY" && -f "$CA_BUNDLE" ]]; then
+  echo "✅ mTLS certificates found"
+  echo "   Client cert: $CLIENT_CERT"
+  echo "   Client key:  $CLIENT_KEY"
+  echo "   CA bundle:   $CA_BUNDLE"
+  CERT_ENABLED=true
+else
+  echo "⚠️  mTLS certificates not found - using plain HTTP"
+fi
+
+# -----------------------------
 # Readiness check
 # -----------------------------
 for TARGET in "${TARGETS[@]}"; do
   echo "Waiting for target to be ready: $TARGET"
-  until curl -s "$TARGET" > /dev/null 2>&1; do sleep 2; done
+  
+  if [[ "$CERT_ENABLED" == "true" ]]; then
+    # Use mTLS
+    until curl -s --cert "$CLIENT_CERT" --key "$CLIENT_KEY" --cacert "$CA_BUNDLE" "$TARGET" > /dev/null 2>&1; do 
+      sleep 2
+    done
+  else
+    # Plain HTTP
+    until curl -s "$TARGET" > /dev/null 2>&1; do 
+      sleep 2
+    done
+  fi
+  
   echo "✅ Target is ready: $TARGET"
 done
 
@@ -130,10 +161,24 @@ EOF
 )
 
       (
-        if curl -s --max-time 10 -X GET "$TARGET" | grep -q "Streamlit"; then
-          increment "$SUCCESS_FILE"
+        if [[ "$CERT_ENABLED" == "true" ]]; then
+          # Use mTLS with client certificate
+          if curl -s --max-time 10 \
+               --cert "$CLIENT_CERT" \
+               --key "$CLIENT_KEY" \
+               --cacert "$CA_BUNDLE" \
+               -X GET "$TARGET" | grep -q "Streamlit"; then
+            increment "$SUCCESS_FILE"
+          else
+            increment "$FAILURE_FILE"
+          fi
         else
-          increment "$FAILURE_FILE"
+          # Plain HTTP (fallback)
+          if curl -s --max-time 10 -X GET "$TARGET" | grep -q "Streamlit"; then
+            increment "$SUCCESS_FILE"
+          else
+            increment "$FAILURE_FILE"
+          fi
         fi
       ) &
 

@@ -1,0 +1,48 @@
+{{- if .Values.certificates.enabled }}
+---
+# Server Certificate for Severus AI Pod
+# This certificate is used by Severus AI to serve HTTPS and verify client certificates
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: severus-ai-tls
+  namespace: {{ .Release.Namespace }}
+spec:
+  # Secret where the certificate will be stored
+  secretName: {{ .Values.certificates.serverCert.secretName }}
+  
+  # Certificate duration and renewal
+  duration: 2160h  # 90 days
+  renewBefore: 360h  # Renew 15 days before expiration
+  
+  # Subject information
+  subject:
+    organizations:
+      - severus-ai
+  commonName: severus-ai
+  
+  # DNS names for the certificate
+  dnsNames:
+    {{- range .Values.certificates.serverCert.dnsNames }}
+    - {{ . }}
+    {{- end }}
+  
+  # Private key configuration
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  
+  # Usages
+  usages:
+    - server auth
+    - client auth
+    - digital signature
+    - key encipherment
+  
+  # Issuer reference
+  issuerRef:
+    name: {{ .Values.certificates.issuer }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+{{- end }}

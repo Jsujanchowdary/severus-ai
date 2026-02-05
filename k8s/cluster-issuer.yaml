@@ -1,0 +1,48 @@
+# ClusterIssuer for Self-Signed CA
+# This creates a self-signed Certificate Authority that will sign all pod certificates
+#
+# Apply after cert-manager is installed:
+#   kubectl apply -f k8s/cluster-issuer.yaml
+#
+# Verify:
+#   kubectl get clusterissuer
+#   kubectl describe clusterissuer selfsigned-cluster-issuer
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-cluster-issuer
+spec:
+  selfSigned: {}
+
+---
+# Root CA Certificate
+# This certificate acts as the root CA for all pod certificates
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: severus-ai-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: severus-ai-ca
+  secretName: severus-ai-ca-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-cluster-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+
+---
+# CA Issuer using the root CA
+# This issuer will be used to sign all pod certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: severus-ai-ca-issuer
+spec:
+  ca:
+    secretName: severus-ai-ca-secret

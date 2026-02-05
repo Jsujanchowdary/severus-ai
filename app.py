@@ -7,6 +7,14 @@ import os
 import threading
 # Fixed: removed invalid code
 
+# Initialize certificate verification
+from cert_middleware import init_certificate_verifier
+CERT_ENFORCE_MODE = os.getenv("CERT_ENFORCE_MODE", "permissive")  # strict or permissive
+cert_verifier = init_certificate_verifier(
+    ca_bundle_path="/etc/certs/ca.crt",
+    enforce_mode=CERT_ENFORCE_MODE
+)
+
 # Start background thread for uptime (multiprocess support)
 def uptime_updater():
     import time

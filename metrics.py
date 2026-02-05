@@ -83,6 +83,18 @@ ERRORS_TOTAL = Counter(
     ["error_type"]  # Labels: ollama_error, file_error, db_error, etc.
 )
 
+# Certificate verification
+CERT_VERIFICATION_SUCCESS = Counter(
+    "severus_cert_verification_success_total",
+    "Total successful certificate verifications"
+)
+
+CERT_VERIFICATION_FAILURE = Counter(
+    "severus_cert_verification_failure_total",
+    "Total failed certificate verifications",
+    ["reason"]  # Labels: missing, invalid_signature, expired, etc.
+)
+
 # ======================================================
 # HISTOGRAMS - Distribution of values
 # ======================================================
@@ -190,3 +202,12 @@ def track_http_request(method, endpoint, status, duration):
     """Track HTTP request."""
     HTTP_REQUESTS.labels(method=method, endpoint=endpoint, status=status).inc()
     HTTP_REQUEST_DURATION.labels(endpoint=endpoint).observe(duration)
+
+def track_cert_verification_success():
+    """Track successful certificate verification."""
+    CERT_VERIFICATION_SUCCESS.inc()
+
+def track_cert_verification_failure(reason="invalid"):
+    """Track failed certificate verification."""
+    CERT_VERIFICATION_FAILURE.labels(reason=reason).inc()
+

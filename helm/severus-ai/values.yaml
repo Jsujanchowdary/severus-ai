@@ -84,6 +84,27 @@ rbac:
   serviceAccountName: stress-sa
 
 # ------------------------
+# Certificates (mTLS)
+# ------------------------
+certificates:
+  enabled: true
+  issuer: severus-ai-ca-issuer
+  
+  serverCert:
+    secretName: severus-ai-tls
+    dnsNames:
+      - severus-ai
+      - severus-ai.default.svc.cluster.local
+  
+  clientCert:
+    secretName: stress-pod-tls
+  
+  verification:
+    # strict: reject requests without valid certificate
+    # permissive: allow requests without certificate (log only)
+    enforceMode: permissive
+
+# ------------------------
 # Monitoring & Observability
 # ------------------------
 monitoring:

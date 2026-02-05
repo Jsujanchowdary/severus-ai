@@ -33,6 +33,16 @@ spec:
               value: /app/data/metrics
             - name: PROMETHEUS_MULTIPROC_DIR
               value: /app/data/metrics
+{{- if .Values.certificates.enabled }}
+            - name: CERT_ENFORCE_MODE
+              value: {{ .Values.certificates.verification.enforceMode }}
+            - name: TLS_CERT_PATH
+              value: /etc/certs/tls.crt
+            - name: TLS_KEY_PATH
+              value: /etc/certs/tls.key
+            - name: CA_BUNDLE_PATH
+              value: /etc/certs/ca.crt
+{{- end }}
           livenessProbe:
             httpGet:
               path: /
@@ -55,6 +65,11 @@ spec:
           volumeMounts:
             - name: app-data
               mountPath: /app/data
+{{- if .Values.certificates.enabled }}
+            - name: tls-certs
+              mountPath: /etc/certs
+              readOnly: true
+{{- end }}
         
         # Metrics exporter sidecar
         - name: metrics-exporter
@@ -89,3 +104,8 @@ spec:
       volumes:
         - name: app-data
           emptyDir: {}
+{{- if .Values.certificates.enabled }}
+        - name: tls-certs
+          secret:
+            secretName: {{ .Values.certificates.serverCert.secretName }}
+{{- end }}

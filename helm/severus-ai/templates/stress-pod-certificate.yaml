@@ -1,0 +1,41 @@
+{{- if .Values.certificates.enabled }}
+---
+# Client Certificate for Stress Pod
+# This certificate is used by stress-pod to authenticate itself to Severus AI
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stress-pod-tls
+  namespace: {{ .Release.Namespace }}
+spec:
+  # Secret where the certificate will be stored
+  secretName: {{ .Values.certificates.clientCert.secretName }}
+  
+  # Certificate duration and renewal
+  duration: 2160h  # 90 days
+  renewBefore: 360h  # Renew 15 days before expiration
+  
+  # Subject information
+  subject:
+    organizations:
+      - stress-pod
+  commonName: stress-pod
+  
+  # Private key configuration
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  
+  # Usages - client authentication
+  usages:
+    - client auth
+    - digital signature
+    - key encipherment
+  
+  # Issuer reference
+  issuerRef:
+    name: {{ .Values.certificates.issuer }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+{{- end }}

@@ -101,6 +101,60 @@ pipeline {
             }
         }
 
+        /* ================= CERTIFICATE MANAGER SETUP ================= */
+
+        stage('Install cert-manager') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "🔐 Installing cert-manager for certificate management..."
+                    
+                    # Check if cert-manager is already installed
+                    if $KUBECTL_BIN get namespace cert-manager 2>/dev/null; then
+                        echo "✅ cert-manager namespace already exists"
+                    else
+                        echo "📥 Installing cert-manager v1.14.0..."
+                        $KUBECTL_BIN apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.0/cert-manager.yaml
+                        
+                        echo "⏳ Waiting for cert-manager to be ready..."
+                        $KUBECTL_BIN wait --for=condition=ready pod -l app=cert-manager -n cert-manager --timeout=300s || true
+                        $KUBECTL_BIN wait --for=condition=ready pod -l app=cainjector -n cert-manager --timeout=300s || true
+                        $KUBECTL_BIN wait --for=condition=ready pod -l app=webhook -n cert-manager --timeout=300s || true
+                        
+                        echo "✅ cert-manager installed successfully"
+                    fi
+                    
+                    # Verify cert-manager is running
+                    $KUBECTL_BIN get pods -n cert-manager
+                '''
+            }
+        }
+
+        stage('Create Certificate Issuer') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "🔑 Creating ClusterIssuer for certificate signing..."
+                    
+                    # Apply ClusterIssuer configuration
+                    $KUBECTL_BIN apply -f k8s/cluster-issuer.yaml
+                    
+                    # Wait for ClusterIssuer to be ready
+                    echo "⏳ Waiting for ClusterIssuer to be ready..."
+                    sleep 10
+                    
+                    # Verify ClusterIssuer status
+                    $KUBECTL_BIN get clusterissuer
+                    $KUBECTL_BIN describe clusterissuer severus-ai-ca-issuer || true
+                    
+                    # Check if CA certificate was created
+                    $KUBECTL_BIN get certificate -n cert-manager || echo "No certificates yet"
+                    
+                    echo "✅ ClusterIssuer created successfully"
+                '''
+            }
+        }
+
         /* ================= BUILD ================= */
 
         stage('Application Build') {
@@ -307,6 +361,40 @@ pipeline {
 
                     echo "⏳ Waiting for rollout to complete (Ensuring No 503 during tests)..."
                     $KUBECTL_BIN rollout status deployment/severus-ai --timeout=120s
+                '''
+            }
+        }
+
+        stage('Verify Certificates') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "🔍 Verifying certificates are created..."
+                    
+                    # Wait for certificates to be issued
+                    echo "⏳ Waiting for certificates to be ready..."
+                    sleep 15
+                    
+                    # Check certificate status
+                    echo "📋 Certificate Status:"
+                    $KUBECTL_BIN get certificates || echo "No certificates found yet"
+                    
+                    # Check certificate secrets
+                    echo ""
+                    echo "🔐 Certificate Secrets:"
+                    $KUBECTL_BIN get secrets | grep tls || echo "No TLS secrets found yet"
+                    
+                    # Describe certificates for details
+                    echo ""
+                    echo "📄 Severus AI Certificate Details:"
+                    $KUBECTL_BIN describe certificate severus-ai-tls 2>/dev/null || echo "Certificate not ready yet (will be created on first deployment)"
+                    
+                    echo ""
+                    echo "📄 Stress Pod Certificate Details:"
+                    $KUBECTL_BIN describe certificate stress-pod-tls 2>/dev/null || echo "Certificate not ready yet (will be created on first deployment)"
+                    
+                    echo ""
+                    echo "✅ Certificate verification completed"
                 '''
             }
         }
