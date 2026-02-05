@@ -99,7 +99,6 @@ spec:
           volumeMounts:
             - name: app-data
               mountPath: /app/data
-{{- end }}
         
         # Metrics exporter sidecar
         - name: metrics-exporter
