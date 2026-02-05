@@ -1,0 +1,15 @@
+{{- if and .Values.ingress.enabled .Values.ingress.tls.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "severus-ai.fullname" . }}-external
+  labels:
+    {{- include "severus-ai.labels" . | nindent 4 }}
+spec:
+  secretName: {{ .Values.ingress.tls.secretName }}
+  issuerRef:
+    name: {{ .Values.certificates.issuer }}
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.ingress.hostname | default "severus-ai.local" }}
+{{- end }}

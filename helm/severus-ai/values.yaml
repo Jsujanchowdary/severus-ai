@@ -30,6 +30,10 @@ service:
 ingress:
   enabled: true
   className: traefik
+  hostname: severus-ai.local
+  tls:
+    enabled: true
+    secretName: severus-ai-external-tls
   hosts:
     - host: severus-ai.local
       paths:

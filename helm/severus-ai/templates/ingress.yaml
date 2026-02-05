@@ -9,8 +9,14 @@ metadata:
     traefik.ingress.kubernetes.io/service.sticky.cookie.name: "severus_sticky"
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+{{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.hostname | default "severus-ai.local" }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+{{- end }}
   rules:
-    - host: severus-ai.local
+    - host: {{ .Values.ingress.hostname | default "severus-ai.local" }}
       http:
         paths:
           - path: /
