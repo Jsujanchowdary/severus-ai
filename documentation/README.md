@@ -18,6 +18,8 @@ This directory contains comprehensive technical documentation for the **Severus 
 | **[06_Helm_Configuration.md](06_Helm_Configuration.md)** | Kubernetes deployment via Helm | Deployment specs, service configuration, RBAC |
 | **[07_Networking_Architecture.md](07_Networking_Architecture.md)** | Network topology and configuration | Kubernetes networking, Ingress, mTLS connectivity |
 | **[SECURITY.md](SECURITY.md)** | Security implementation details | mTLS, HTTPS, sidecar logic, cert-manager |
+| **[OVERALL_ARCHITECTURE.md](OVERALL_ARCHITECTURE.md)** | **RESEARCH**: Global system overview | High-level diagrams, data flow, tech stack |
+| **[RESEARCH_PAPER_FULL_DOCS.md](RESEARCH_PAPER_FULL_DOCS.md)** | **RESEARCH**: Ready-to-use research data | Comprehensive code listings, features, innovations |
 
 ---
 
