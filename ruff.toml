@@ -5,4 +5,4 @@ exclude = ["venv", ".git", "__pycache__", "*.egg-info"]
 
 [format]
 quote-style = "double"
-indent-width = 4
+indent-style = "space"
