@@ -1,0 +1,8 @@
+[lint]
+select = ["E", "F", "W", "I", "N"]
+ignore = ["E501"]  # Line too long
+exclude = ["venv", ".git", "__pycache__", "*.egg-info"]
+
+[format]
+quote-style = "double"
+indent-width = 4

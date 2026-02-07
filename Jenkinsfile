@@ -161,17 +161,83 @@ pipeline {
                 sh '''
                     set -euo pipefail
 
-                    echo "🔧 Installing dependencies (venv)..."
+                    echo "🏗️ Application Build"
 
+                    # Create isolated environment
                     $PYTHON_BIN -m venv venv
                     . venv/bin/activate
 
-                    echo "Python in use: $(which python)"
-                    echo "Pip in use: $(which pip)"
+                    echo "Python: $(python --version)"
+                    echo "Pip: $(pip --version)"
 
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                    # Upgrade tooling
+                    pip install --upgrade pip setuptools wheel
+
+                    # Install dependencies (locked)
+                    if [ -f requirements.txt ]; then
+                        pip install -r requirements.txt
+                    else
+                        echo "❌ requirements.txt not found"
+                        exit 1
+                    fi
+
+                    # Sanity check
+                    pip check
+
+                    echo "✅ Build completed successfully"
                 '''
+            }
+        }
+
+        /* ================= CODE QUALITY ================= */
+
+        stage('Code Quality') {
+            steps {
+                sh '''
+                    set -euo pipefail
+
+                    echo "🧪 Code Quality Checks"
+
+                    . venv/bin/activate
+
+                    # Install quality tools
+                    pip install ruff mypy pytest coverage radon
+
+                    echo "🔍 Linting (Ruff) — BLOCKING"
+                    ruff check . --exclude venv --exclude .git
+
+                    echo "🧪 Unit tests + coverage — NON-BLOCKING (no tests yet)"
+                    if [ -d "tests" ] || ls test_*.py 2>/dev/null | grep -v venv; then
+                        coverage run -m pytest || echo "⚠️ Tests failed (non-blocking)"
+                        coverage report || true
+                        coverage xml || true
+                    else
+                        echo "⚠️ No tests found - skipping coverage"
+                    fi
+
+                    echo "🧠 Type checking (Mypy) — NON-BLOCKING"
+                    mypy app.py --ignore-missing-imports || echo "⚠️ Mypy warnings detected"
+
+                    echo "📊 Code complexity (Radon) — VISIBILITY ONLY"
+                    radon cc . -a --exclude venv || true
+                    radon mi . -s --exclude venv || true
+
+                    echo "✅ Code quality checks completed"
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        # Archive coverage report if it exists
+                        if [ -f coverage.xml ]; then
+                            echo "📊 Coverage report generated"
+                        fi
+                    '''
+                    archiveArtifacts artifacts: 'coverage.xml', allowEmptyArchive: true, fingerprint: true
+                }
+                failure {
+                    echo "❌ Code quality gate failed - blocking deployment"
+                }
             }
         }
 

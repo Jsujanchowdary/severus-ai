@@ -1,0 +1,10 @@
+[run]
+omit = 
+    venv/*
+    tests/*
+    */__pycache__/*
+    *.egg-info/*
+
+[report]
+precision = 2
+show_missing = True
