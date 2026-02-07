@@ -1,10 +1,19 @@
 [run]
-omit = 
-    venv/*
-    tests/*
-    */__pycache__/*
-    *.egg-info/*
-
+# Only measure coverage for project files in root directory
+source = .
+omit =
+    */venv/*
+    */test_*.py
+    config/*
+    documentation/*
+    helm/*
+    k8s/*
+    stress-pod/*
+    utils/*
+    data/*
+    
 [report]
+exclude_lines =
+    pragma: no cover/*
 precision = 2
 show_missing = True

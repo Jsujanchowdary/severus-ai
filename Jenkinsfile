@@ -196,18 +196,20 @@ pipeline {
                 sh '''
                     set -euo pipefail
 
-                    echo "🧪 Code Quality Checks"
+                    echo "🧪 Code Quality Checks (Project Files Only)"
 
                     . venv/bin/activate
 
-                    # Install quality tools
-                    pip install ruff mypy pytest coverage radon
+                    # Install quality tools and type stubs
+                    pip install ruff mypy pytest coverage radon types-requests
 
                     echo "🔍 Linting (Ruff) — BLOCKING"
-                    ruff check . --exclude venv --exclude .git
+                    # Ruff will automatically use ruff.toml configuration
+                    ruff check .
 
-                    echo "🧪 Unit tests + coverage — NON-BLOCKING (no tests yet)"
+                    echo "🧪 Unit tests + coverage — NON-BLOCKING"
                     if [ -d "tests" ] || ls test_*.py 2>/dev/null | grep -v venv; then
+                        # Pytest and coverage will use their config files
                         coverage run -m pytest || echo "⚠️ Tests failed (non-blocking)"
                         coverage report || true
                         coverage xml || true
@@ -216,11 +218,13 @@ pipeline {
                     fi
 
                     echo "🧠 Type checking (Mypy) — NON-BLOCKING"
-                    mypy app.py --ignore-missing-imports || echo "⚠️ Mypy warnings detected"
+                    # Mypy will automatically use mypy.ini configuration
+                    mypy . || echo "⚠️ Mypy warnings detected"
 
                     echo "📊 Code complexity (Radon) — VISIBILITY ONLY"
-                    radon cc . -a --exclude venv || true
-                    radon mi . -s --exclude venv || true
+                    # Only check root-level Python files
+                    radon cc *.py -a || true
+                    radon mi *.py -s || true
 
                     echo "✅ Code quality checks completed"
                 '''
