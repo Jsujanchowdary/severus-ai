@@ -25,6 +25,13 @@ POD_LABELS=()
 DATA_SET=("alpha" "beta" "gamma" "delta" "epsilon")
 
 # -----------------------------
+# AI ANALYSIS CONFIGURATION
+# -----------------------------
+OLLAMA_API="${OLLAMA_API:-http://localhost:11434}"
+OLLAMA_MODEL="${OLLAMA_MODEL:-deepseek-v3.1:671b-cloud}"
+K_CMD="kubectl"
+
+# -----------------------------
 # Parse arguments
 # -----------------------------
 while [[ $# -gt 0 ]]; do
@@ -278,5 +285,160 @@ if [[ ${#POD_LABELS[@]} -gt 0 ]]; then
   [[ "$OVERALL_STATUS" == "FAIL" ]] && exit 1
 fi
 
+# -----------------------------
+# AI-POWERED COST ANALYSIS (Ollama)
+# -----------------------------
+analyze_with_ollama() {
+  echo ""
+  echo "=============================================="
+  echo "🤖 AI COST OPTIMIZATION ANALYSIS (Ollama)"
+  echo "=============================================="
+  
+  # Check if Ollama is available
+  if ! curl -s --max-time 3 "$OLLAMA_API/api/tags" > /dev/null 2>&1; then
+    echo "⚠️  Ollama not available at $OLLAMA_API - skipping AI analysis"
+    echo "   To enable: start Ollama with 'ollama serve'"
+    return 0
+  fi
+  
+  # Collect metrics for analysis
+  local SUCCESS_COUNT=$(cat "$SUCCESS_FILE" 2>/dev/null || echo 0)
+  local FAILURE_COUNT=$(cat "$FAILURE_FILE" 2>/dev/null || echo 0)
+  local TOTAL_COUNT=$((SUCCESS_COUNT + FAILURE_COUNT))
+  local SUCCESS_RATE=0
+  [[ $TOTAL_COUNT -gt 0 ]] && SUCCESS_RATE=$((SUCCESS_COUNT * 100 / TOTAL_COUNT))
+  
+  local DURATION=$((END_TIME - START_TIME))
+  local THROUGHPUT=0
+  [[ $DURATION -gt 0 ]] && THROUGHPUT=$(awk -v t="$TOTAL_COUNT" -v d="$DURATION" 'BEGIN {printf "%.1f", t / d}')
+  
+  # Get pod count and resource metrics
+  local POD_COUNT=0
+  
+  if [[ ${#POD_LABELS[@]} -gt 0 ]]; then
+    for LABEL in "${POD_LABELS[@]}"; do
+      local COUNT=$($K_CMD get pods -l "$LABEL" --field-selector=status.phase=Running -o name 2>/dev/null | wc -l | xargs)
+      POD_COUNT=$((POD_COUNT + COUNT))
+    done
+  else
+    POD_COUNT=$($K_CMD get pods --field-selector=status.phase=Running -o name 2>/dev/null | wc -l | xargs)
+  fi
+  
+  # Extract peak metrics from resource log
+  local TOTAL_PEAK_CPU=0
+  local TOTAL_PEAK_MEM=0
+  if [[ -f "$RESOURCE_LOG" && $(wc -l <"$RESOURCE_LOG") -gt 1 ]]; then
+    # Calculate aggregate peaks for scaling math
+    TOTAL_PEAK_CPU=$(awk -F',' 'NR>1 {cpu[$2] = (cpu[$2] > $3 ? cpu[$2] : $3)} END {for (p in cpu) sum += cpu[p]; print sum}' "$RESOURCE_LOG")
+    TOTAL_PEAK_MEM=$(awk -F',' 'NR>1 {mem[$2] = (mem[$2] > $4 ? mem[$2] : $4)} END {for (p in mem) sum += mem[p]; print sum}' "$RESOURCE_LOG")
+  fi
+
+  # =====================================================
+  # MATHEMATICAL SCALING CALCULATIONS
+  # =====================================================
+  local TARGET_CPU_UTIL=50 # Target 50% utilization
+  local IDEAL_POD_COUNT=$POD_COUNT
+  local CPU_REQ_RECOMMENDED="N/A"
+  local CPU_LIM_RECOMMENDED="N/A"
+  local MEM_REQ_RECOMMENDED="N/A"
+  local MEM_LIM_RECOMMENDED="N/A"
+  local COST_SAVINGS_PERCENT=0
+  
+  if [[ $POD_COUNT -gt 0 && $TOTAL_PEAK_CPU -gt 0 ]]; then
+    # Calculate Ideal Pods: (Total Peak CPU / Target Utilization)
+    IDEAL_POD_COUNT=$(awk -v total_cpu="$TOTAL_PEAK_CPU" -v target="$TARGET_CPU_UTIL" 'BEGIN {print int((total_cpu/target) + 0.99)}')
+    [[ $IDEAL_POD_COUNT -lt 1 ]] && IDEAL_POD_COUNT=1
+    
+    # Calculate Resources per Pod (Current workload intensity)
+    local CPU_PER_POD=$(awk -v total_cpu="$TOTAL_PEAK_CPU" -v pods="$POD_COUNT" 'BEGIN {print total_cpu/pods}')
+    local MEM_PER_POD=$(awk -v total_mem="$TOTAL_PEAK_MEM" -v pods="$POD_COUNT" 'BEGIN {print total_mem/pods}')
+    
+    # Recommendations with headroom: 20% for Request, 50% for Limit
+    CPU_REQ_RECOMMENDED=$(awk -v cpu="$CPU_PER_POD" 'BEGIN {printf "%.0fm", cpu * 1.2}')
+    CPU_LIM_RECOMMENDED=$(awk -v cpu="$CPU_PER_POD" 'BEGIN {printf "%.0fm", cpu * 1.5}')
+    MEM_REQ_RECOMMENDED=$(awk -v mem="$MEM_PER_POD" 'BEGIN {printf "%.0fMi", mem * 1.2}')
+    MEM_LIM_RECOMMENDED=$(awk -v mem="$MEM_PER_POD" 'BEGIN {printf "%.0fMi", mem * 1.5}')
+    
+    # Calculate Savings: ((Current - Ideal) / Current) * 100
+    COST_SAVINGS_PERCENT=$(awk -v cur="$POD_COUNT" -v ideal="$IDEAL_POD_COUNT" 'BEGIN {printf "%.1f", ((cur - ideal) / cur) * 100}')
+  fi
+
+  # Build the prompt
+  local PROMPT="You are a Kubernetes scaling expert. I have performed mathematical scaling calculations based on stress test metrics. 
+Summarize these results and explain the reasoning and also let me know if there is any other solution to decrease the cost and increase the performance.
+
+CALCULATED METRICS:
+•  Requests: $TOTAL_COUNT total, $FAILURE_COUNT failed (${SUCCESS_RATE}% success)
+•  Throughput: ${THROUGHPUT} req/s
+•  Current State: $POD_COUNT pods | Peak CPU: $TOTAL_PEAK_CPU m | Peak Mem: $TOTAL_PEAK_MEM Mi
+•  Missed Requests: $FAILURE_COUNT
+
+DETERMINISTIC RECOMMENDATIONS (Use these in your report):
+1. HORIZONTAL SCALING:
+   - Recommended: $IDEAL_POD_COUNT pods (Targeting ${TARGET_CPU_UTIL}% CPU utilization)
+   - Estimated Savings: ${COST_SAVINGS_PERCENT}%
+
+2. VERTICAL SCALING:
+   - CPU Request/Limit: $CPU_REQ_RECOMMENDED / $CPU_LIM_RECOMMENDED
+   - Memory Request/Limit: $MEM_REQ_RECOMMENDED / $MEM_LIM_RECOMMENDED
+
+Write a concise report following this structure:
+1. MISSED REQUESTS: Analysis of failures.
+2. HORIZONTAL SCALING: Recommendation based on the calculated $IDEAL_POD_COUNT pods.
+3. VERTICAL SCALING: Justify the resource recommendations.
+4. ESTIMATED SAVINGS: Explain the ${COST_SAVINGS_PERCENT}% savings/cost impact.
+
+Monthly cost estimate: Assuming \$0.05/pod/hour, current cost is \$$(awk -v p="$POD_COUNT" 'BEGIN {printf "%.2f", p * 0.05 * 24 * 30}') vs optimized \$$(awk -v p="$IDEAL_POD_COUNT" 'BEGIN {printf "%.2f", p * 0.05 * 24 * 30}').
+
+Keep it professional and data-driven. No disclaimers or filler."
+
+  # Escape the prompt for JSON
+  local ESCAPED_PROMPT=$(echo "$PROMPT" | jq -Rs .)
+  
+  # Call Ollama API
+  echo "Analyzing with $OLLAMA_MODEL..."
+  echo ""
+  
+  local RESPONSE=$(curl -s --max-time 60 "$OLLAMA_API/api/generate" \
+    -H "Content-Type: application/json" \
+    -d "{\"model\": \"$OLLAMA_MODEL\", \"prompt\": $ESCAPED_PROMPT, \"stream\": false}" 2>/dev/null)
+  
+  if [[ -z "$RESPONSE" ]]; then
+    echo "⚠️  No response from Ollama - model may be loading or unavailable"
+    return 0
+  fi
+  
+  # Extract the response text
+  local ANALYSIS=$(echo "$RESPONSE" | jq -r '.response // empty' 2>/dev/null)
+  
+  if [[ -n "$ANALYSIS" ]]; then
+    echo "----------------------------------------------"
+    echo "$ANALYSIS"
+    echo "----------------------------------------------"
+    echo ""
+    
+    # Save analysis to file for later reference
+    local ANALYSIS_FILE="/tmp/stress_analysis_$(date +%Y%m%d_%H%M%S).txt"
+    {
+      echo "Stress Test Analysis - $(date)"
+      echo "=============================================="
+      echo "Metrics:"
+      echo "  Requests: $TOTAL_COUNT (${SUCCESS_RATE}% success)"
+      echo "  Duration: ${DURATION}s | Throughput: ${THROUGHPUT} req/s"
+      echo "  Pods: $POD_COUNT"
+      echo ""
+      echo "AI Analysis:"
+      echo "$ANALYSIS"
+    } > "$ANALYSIS_FILE"
+    echo "📄 Analysis saved to: $ANALYSIS_FILE"
+  else
+    echo "⚠️  Could not parse Ollama response"
+    echo "Raw response: $RESPONSE"
+  fi
+}
+
 echo ""
 echo "✅ STRESS TEST COMPLETED SUCCESSFULLY"
+
+# Run Ollama analysis
+analyze_with_ollama
