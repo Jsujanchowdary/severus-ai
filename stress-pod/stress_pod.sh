@@ -418,8 +418,9 @@ Monthly cost estimate: Assuming \$0.05/pod/hour, current cost is \$$(awk -v p="$
 
 Keep it professional and data-driven. No disclaimers or filler."
 
-  # Escape the prompt for JSON
-  local ESCAPED_PROMPT=$(echo "$PROMPT" | jq -Rs .)
+  # Escape the prompt for JSON (without jq dependency)
+  # Escape backslashes, quotes, newlines, tabs, and other special chars
+  local ESCAPED_PROMPT=$(echo "$PROMPT" | sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/g' | tr -d '\n' | sed 's/\\n$//')
   
   # Call Ollama API
   echo "Analyzing with $OLLAMA_MODEL..."
@@ -427,15 +428,16 @@ Keep it professional and data-driven. No disclaimers or filler."
   
   local RESPONSE=$(curl -s --max-time 60 "$OLLAMA_API/api/generate" \
     -H "Content-Type: application/json" \
-    -d "{\"model\": \"$OLLAMA_MODEL\", \"prompt\": $ESCAPED_PROMPT, \"stream\": false}" 2>/dev/null)
+    -d "{\"model\": \"$OLLAMA_MODEL\", \"prompt\": \"$ESCAPED_PROMPT\", \"stream\": false}" 2>/dev/null)
   
   if [[ -z "$RESPONSE" ]]; then
     echo "⚠️  No response from Ollama - model may be loading or unavailable"
     return 0
   fi
   
-  # Extract the response text
-  local ANALYSIS=$(echo "$RESPONSE" | jq -r '.response // empty' 2>/dev/null)
+  # Extract the response text (without jq dependency)
+  # Parse JSON response field using awk to handle multi-line responses
+  local ANALYSIS=$(echo "$RESPONSE" | awk -F'"response":"' '{if (NF>1) {print $2}}' | awk -F'","' '{print $1}' | sed 's/\\n/\n/g; s/\\t/\t/g; s/\\"/"/g; s/\\\\/\\/g' 2>/dev/null)
   
   if [[ -n "$ANALYSIS" ]]; then
     echo "----------------------------------------------"
