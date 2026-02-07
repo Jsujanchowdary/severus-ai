@@ -10,12 +10,20 @@ This module defines and exposes metrics for monitoring:
 """
 
 import os
+
 # Must be set BEFORE prometheus_client imports any metrics
 if "prometheus_multiproc_dir" not in os.environ:
     os.environ["prometheus_multiproc_dir"] = "/app/data/metrics"
 
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 import time
+
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 
 # ======================================================
 # COUNTERS - Monotonically increasing values
@@ -146,7 +154,7 @@ def update_uptime():
 def get_metrics():
     """
     Generate Prometheus metrics in text format.
-    
+
     Returns:
         tuple: (metrics_data, content_type)
     """
@@ -184,7 +192,7 @@ def track_file_upload(file_type):
 def track_ollama_call(model, duration, success=True):
     """
     Track Ollama API call.
-    
+
     Args:
         model: Model name
         duration: Request duration in seconds

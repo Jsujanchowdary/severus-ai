@@ -1,7 +1,7 @@
-import requests
 import json
 import os
-import sys
+
+import requests
 
 # Configuration with environment variable overrides
 GRAFANA_URL = os.getenv("GRAFANA_URL", "http://localhost:3000/api/dashboards/db")
@@ -14,7 +14,7 @@ DASHBOARD_FILE = os.getenv("DASHBOARD_FILE", "config/grafana-dashboard-applicati
 
 def import_dashboard():
     print(f"🔍 Attempting to import dashboard from {DASHBOARD_FILE} to {GRAFANA_URL}...")
-    
+
     if not os.path.exists(DASHBOARD_FILE):
         print(f"❌ Dashboard file not found: {DASHBOARD_FILE}")
         return
@@ -25,15 +25,15 @@ def import_dashboard():
         except json.JSONDecodeError as e:
             print(f"❌ Failed to parse JSON: {e}")
             return
-    
+
     # Ensure overwrite is set
     dashboard_data['overwrite'] = True
-    
+
     headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
-    
+
     try:
         response = requests.post(GRAFANA_URL, auth=AUTH, json=dashboard_data, headers=headers)
         if response.status_code == 200:

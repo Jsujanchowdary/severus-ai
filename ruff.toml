@@ -1,6 +1,6 @@
 [lint]
 select = ["E", "F", "W", "I", "N"]
-ignore = ["E501"]  # Line too long
+ignore = ["E501", "E402", "E722"]  # Line too long, imports not at top (intentional), bare except
 exclude = ["venv", ".git", "__pycache__", "*.egg-info"]
 
 [format]

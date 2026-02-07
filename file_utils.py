@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 from file_text_extractor import extract_text_from_file
 
 UPLOAD_BASE = Path("data/uploads")

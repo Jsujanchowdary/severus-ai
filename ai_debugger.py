@@ -4,13 +4,13 @@ Repo-wide AI Debugger for Jenkins
 Deterministically locates errors (file + line) before invoking AI.
 """
 
-import os
-import sys
 import argparse
 import datetime
-from pathlib import Path
-import requests
+import os
 import re
+from pathlib import Path
+
+import requests
 
 # ---------------- CONFIG ---------------- #
 
@@ -36,16 +36,16 @@ class CodebaseIngester:
     def ingest(self, exclude_files=None):
         if exclude_files is None:
             exclude_files = set()
-        
+
         for root, dirs, files in os.walk(self.repo_path):
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
             for file in files:
                 path = Path(root) / file
-                
+
                 # Exclude the report output file and other non-source files
                 if file in exclude_files or file == "report.txt" or file.endswith(".log"):
                     continue
-                    
+
                 if path.suffix.lower() not in SUPPORTED_EXTENSIONS and file != "Jenkinsfile":
                     continue
                 if path.stat().st_size > MAX_FILE_SIZE:

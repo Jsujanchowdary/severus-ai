@@ -2,13 +2,15 @@
 Severus AI - Personal AI Assistant with Prometheus Monitoring
 """
 
-import metrics
 import os
 import threading
-# Fixed: removed invalid code
 
+import metrics
+
+# Fixed: removed invalid code
 # Initialize certificate verification
 from cert_middleware import init_certificate_verifier
+
 CERT_ENFORCE_MODE = os.getenv("CERT_ENFORCE_MODE", "permissive")  # strict or permissive
 cert_verifier = init_certificate_verifier(
     ca_bundle_path="/etc/certs/ca.crt",
@@ -30,21 +32,21 @@ threading.Thread(target=uptime_updater, daemon=True).start()
 # ======================================================
 # STREAMLIT APPLICATION
 # ======================================================
-import streamlit as st
-from pathlib import Path
 import threading
 
-from storage import init_db
-from auth import signup, login
+import streamlit as st
+
+from auth import login, signup
 from chat import (
-    create_chat,
-    get_user_chats,
-    get_messages,
-    save_message,
-    delete_chat,
     add_file_record,
+    create_chat,
+    delete_chat,
+    get_messages,
+    get_user_chats,
+    save_message,
 )
-from file_utils import save_uploaded_file, ensure_extracted_text
+from file_utils import ensure_extracted_text, save_uploaded_file
+from storage import init_db
 from utils.ollama_client import chat_with_model
 
 # ======================================================

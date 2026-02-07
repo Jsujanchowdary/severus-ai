@@ -1,4 +1,5 @@
 import logging
+
 from config.settings import LOG_LEVEL
 
 

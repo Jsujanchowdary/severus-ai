@@ -4,10 +4,15 @@ Metrics exporter sidecar for Severus AI.
 Reads metrics from the shared multiprocess directory and exposes them.
 """
 
-from prometheus_client import start_http_server, CollectorRegistry, multiprocess, generate_latest, CONTENT_TYPE_LATEST
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
-import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    generate_latest,
+    multiprocess,
+)
 
 # Ensure we know where to read metrics from
 # prometheus_client expects lowercase 'prometheus_multiproc_dir'
@@ -18,12 +23,12 @@ PROMETHEUS_MULTIPROC_DIR = os.environ["prometheus_multiproc_dir"]
 
 def run_server():
     print(f"🚀 Starting metrics exporter reading from {PROMETHEUS_MULTIPROC_DIR}...")
-    
+
     # Verify directory exists
     if not os.path.exists(PROMETHEUS_MULTIPROC_DIR):
         print(f"⚠️  Warning: {PROMETHEUS_MULTIPROC_DIR} does not exist yet. Waiting...")
         os.makedirs(PROMETHEUS_MULTIPROC_DIR, exist_ok=True)
-    
+
     # Custom handler to gather metrics on every request
     class MetricsHandler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -32,7 +37,7 @@ def run_server():
                     registry = CollectorRegistry()
                     multiprocess.MultiProcessCollector(registry, path=PROMETHEUS_MULTIPROC_DIR)
                     data = generate_latest(registry)
-                    
+
                     self.send_response(200)
                     self.send_header('Content-Type', CONTENT_TYPE_LATEST)
                     self.end_headers()
@@ -44,7 +49,7 @@ def run_server():
             else:
                 self.send_response(404)
                 self.end_headers()
-        
+
         def log_message(self, format, *args):
             pass  # Suppress logs
 

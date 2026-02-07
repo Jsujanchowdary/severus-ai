@@ -1,10 +1,10 @@
-import sys
 import os
+import sys
+
 # Add current directory to path
 sys.path.append(os.getcwd())
 
 from utils.ollama_client import chat_with_model
-import metrics
 
 print("Testing Ollama with DeepSeek...")
 try:

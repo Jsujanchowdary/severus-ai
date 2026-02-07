@@ -1,8 +1,10 @@
-import requests
-from pathlib import Path
 import logging
 import os
 import time
+from pathlib import Path
+
+import requests
+
 import metrics
 
 # =========================
@@ -107,18 +109,18 @@ Uploaded document sources:
 
         response.raise_for_status()
         duration = time.time() - start_time
-        
+
         # Track successful Ollama call
         metrics.track_ollama_call(model, duration, success=True)
-        
+
         return response.json()["message"]["content"]
 
     except Exception as e:
         duration = time.time() - start_time
         logger.error(f"Ollama error: {e}")
-        
+
         # Track failed Ollama call
         metrics.track_ollama_call(model, duration, success=False)
         metrics.track_error("ollama_error")
-        
+
         return "⚠️ Error communicating with Ollama. Is Ollama running?"

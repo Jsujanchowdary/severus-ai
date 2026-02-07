@@ -1,6 +1,7 @@
 import csv
 import hashlib
 from pathlib import Path
+
 from utils.logger import setup_logger
 
 logger = setup_logger("auth")
