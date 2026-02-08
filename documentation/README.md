@@ -1,12 +1,26 @@
 # Severus AI - Complete Technical Documentation
 
-## Overview
+## 🌟 Research Paper Documentation (NEW)
 
-This directory contains comprehensive technical documentation for the **Severus AI** cloud-native platform with AI-powered CI/CD automation. These documents were created to support research paper preparation and provide detailed insights into the system architecture, novel contributions, and implementation details.
+These documents have been specifically prepared for research paper writing, featuring full code listings, architecture diagrams, and mathematical formulas.
+
+| Document | Feature | Key Content |
+| :--- | :--- | :--- |
+| **[research_paper/INDEX.md](research_paper/INDEX.md)** | **Master Index** | Overview of all research-ready documentation |
+| **[01 STRESS TESTING](research_paper/01_stress_testing_cost_optimization.md)** | **PRIMARY NOVELTY** | AI cost analysis, scaling formulas, full source code |
+| **[02 AI DEBUGGING](research_paper/02_ai_debugging_system.md)** | **NOVELTY** | Hybrid error location, root cause analysis, full code |
+| **[03 mTLS SECURITY](research_paper/03_certificate_security_mtls.md)** | **NOVELTY** | Zero-trust logic, signature verification, full code |
+| **[04 MONITORING](research_paper/04_monitoring_observability.md)** | **NOVELTY** | Custom Prometheus metrics, P99 latency, full code |
+| **[05 CHAT APP](research_paper/05_ai_chat_application.md)** | Core Architecture | Document-aware prompting, inference lifecycle |
+| **[06 AUTH & IDENTITY](research_paper/06_authentication_authorization.md)** | User Security | Hashing, persistence models, session state |
+| **[07 FILE MGMT](research_paper/07_file_management.md)** | Data Ingestion | Extraction pipeline, multi-format support |
+| **[08 CI/CD PIPELINE](research_paper/08_cicd_pipeline.md)** | DevOps Lifecycle | Full 18-stage Jenkinsfile, quality gates |
+| **[09 SYSTEM ARCH](research_paper/09_system_architecture.md)** | Ecosystem Overview | Tech stack, macro-architecture blueprints |
+| **[RESULTS](research_paper/results.md)** | **Empirical Results** | Stress test metrics, AI findings, security scans |
 
 ---
 
-## Documentation Structure
+## Legacy Documentation Structure
 
 | Document | Description | Key Topics |
 |----------|-------------|------------|
