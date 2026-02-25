@@ -74,7 +74,7 @@ stress:
     
     # Load parameters - Increased for HPA scaling demo
     totalRequests: 2000
-    concurrency: 150
+    concurrency: 250
     runs: 10
     sleepSeconds: 2
     
