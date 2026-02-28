@@ -33,8 +33,22 @@ pipeline {
                 sh '''
                     set -euo pipefail
                     echo "📥 Adding Prometheus Helm repository..."
-                    $HELM_BIN repo add prometheus-community https://prometheus-community.github.io/helm-charts
-                    $HELM_BIN repo update
+                    $HELM_BIN repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+                    
+                    echo "🔄 Updating Helm repositories (with retry)..."
+                    for i in 1 2 3; do
+                        echo "👉 Update attempt $i..."
+                        if $HELM_BIN repo update; then
+                            echo "✅ Helm update succeeded"
+                            break
+                        fi
+                        if [ $i -eq 3 ]; then
+                            echo "❌ Helm update failed after retries"
+                            exit 1
+                        fi
+                        echo "⚠️ Update failed, retrying in 5s..."
+                        sleep 5
+                    done
                 '''
             }
         }
