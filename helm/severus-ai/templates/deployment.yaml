@@ -47,6 +47,13 @@ spec:
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
 {{- end }}
         - name: severus-ai
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
