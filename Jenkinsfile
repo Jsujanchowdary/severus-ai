@@ -446,7 +446,7 @@ pipeline {
                     $KUBECTL_BIN rollout restart deployment/severus-ai
 
                     echo "⏳ Waiting for rollout to complete (Ensuring No 503 during tests)..."
-                    $KUBECTL_BIN rollout status deployment/severus-ai --timeout=120s
+                    $KUBECTL_BIN rollout status deployment/severus-ai --timeout=300s
                 '''
             }
         }
