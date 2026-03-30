@@ -62,6 +62,9 @@ pipeline {
                     $KUBECTL_BIN delete mutatingwebhookconfiguration kube-prometheus-stack-admission --ignore-not-found=true
                     $KUBECTL_BIN delete validatingwebhookconfiguration kube-prometheus-stack-admission --ignore-not-found=true
 
+                    echo "📥 Upgrading Prometheus Operator CRDs..."
+                    curl -sL https://github.com/prometheus-operator/prometheus-operator/releases/latest/download/stripped-down-crds.yaml | $KUBECTL_BIN apply --server-side --force-conflicts -f -
+
                     $HELM_BIN upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
                         --namespace default \
                         --set grafana.adminPassword=admin123 \
