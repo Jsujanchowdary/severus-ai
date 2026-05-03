@@ -48,6 +48,7 @@ pipeline {
                         fi
                         echo "⚠️ Update failed, retrying in 5s..."
                         sleep 5
+                        frvevf
                     done
                 '''
             }
